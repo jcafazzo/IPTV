@@ -126,6 +126,29 @@
             height: 100%;
             object-fit: contain;
             background: #000;
+            cursor: pointer;
+        }
+
+        /* Fullscreen styles */
+        .screen:fullscreen,
+        .screen:-webkit-full-screen {
+            background: #000;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .screen:fullscreen #video-player,
+        .screen:-webkit-full-screen #video-player {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+        }
+
+        .screen:fullscreen::before,
+        .screen:fullscreen::after,
+        .screen:-webkit-full-screen::before,
+        .screen:-webkit-full-screen::after {
+            display: none;
         }
 
         /* Static noise effect */
@@ -518,6 +541,603 @@
             border-radius: 4px;
             margin: 0 3px;
         }
+
+        /* Cable Box Remote */
+        .remote-wire {
+            position: absolute;
+            bottom: 100%;
+            left: 20px;
+            width: 4px;
+            height: 150px;
+            background: linear-gradient(90deg, #1a1a1a 0%, #333 50%, #1a1a1a 100%);
+            border-radius: 2px;
+            transform-origin: bottom center;
+            transform: rotate(-15deg);
+        }
+
+        .remote {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 2px solid #333;
+            width: 200px;
+        }
+
+        .remote-brand {
+            text-align: center;
+            color: #666;
+            font-size: 9px;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .remote-display {
+            background: #0a1a0a;
+            color: #33ff33;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 10px;
+            border: 1px solid #333;
+            text-shadow: 0 0 5px #33ff33;
+        }
+
+        .remote-section {
+            margin-bottom: 8px;
+        }
+
+        .remote-section-label {
+            color: #555;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .letter-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+        }
+
+        .remote-btn {
+            background: linear-gradient(180deg, #3a3a3a 0%, #252525 100%);
+            border: 1px solid #444;
+            border-radius: 3px;
+            color: #888;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 5px 2px;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-family: Arial, sans-serif;
+        }
+
+        .remote-btn:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #353535 100%);
+            color: #fff;
+        }
+
+        .remote-btn:active {
+            transform: scale(0.95);
+        }
+
+        .remote-btn.has-channels {
+            color: #4ade80;
+            border-color: #3a5a3a;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .remote-btn.power {
+            background: linear-gradient(180deg, #4a2a2a 0%, #2a1a1a 100%);
+            color: #ff6b6b;
+            flex: 1;
+        }
+
+        .remote-btn.power.on {
+            background: linear-gradient(180deg, #2a4a2a 0%, #1a2a1a 100%);
+            color: #4ade80;
+        }
+
+        .remote-btn.nav {
+            flex: 1;
+        }
+
+        .remote-btn.scan {
+            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a2a 100%);
+            color: #6b9fff;
+            flex: 1;
+        }
+
+        .remote-btn.scan.scanning {
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scan-status {
+            font-size: 8px;
+            color: #666;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .scan-status .working { color: #4ade80; }
+        .scan-status .failed { color: #ff6b6b; }
+
+        /* Chunky MAP button on TV */
+        .map-btn-tv {
+            position: absolute;
+            bottom: 45px;
+            right: 25px;
+            width: 80px;
+            height: 35px;
+            background: linear-gradient(180deg, #c41e3a 0%, #8b0000 50%, #5c0000 100%);
+            border: 3px solid #ff6b6b;
+            border-radius: 8px;
+            color: #ffd700;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow:
+                0 4px 0 #3d0000,
+                0 6px 10px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.2);
+            transition: all 0.1s;
+            text-shadow: 0 0 5px #ffd700;
+        }
+
+        .map-btn-tv:hover {
+            background: linear-gradient(180deg, #d42a4a 0%, #9b1010 50%, #6c1010 100%);
+            text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+        }
+
+        .map-btn-tv:active {
+            transform: translateY(3px);
+            box-shadow:
+                0 1px 0 #3d0000,
+                0 2px 5px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.2);
+        }
+
+        .map-btn-tv::before {
+            content: '📺';
+            margin-right: 5px;
+        }
+
+        /* Chunky REMOTE button on TV */
+        .remote-btn-tv {
+            position: absolute;
+            bottom: 45px;
+            left: 25px;
+            width: 90px;
+            height: 35px;
+            background: linear-gradient(180deg, #1a6b1a 0%, #0d4d0d 50%, #063006 100%);
+            border: 3px solid #4ade80;
+            border-radius: 8px;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow:
+                0 4px 0 #032003,
+                0 6px 10px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.2);
+            transition: all 0.1s;
+            text-shadow: 0 0 5px #4ade80;
+        }
+
+        .remote-btn-tv:hover {
+            background: linear-gradient(180deg, #2a8b2a 0%, #1d6d1d 50%, #164016 100%);
+            text-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80;
+        }
+
+        .remote-btn-tv:active {
+            transform: translateY(3px);
+            box-shadow:
+                0 1px 0 #032003,
+                0 2px 5px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.2);
+        }
+
+        .remote-btn-tv::before {
+            content: '🎮';
+            margin-right: 4px;
+        }
+
+        /* Cable Box Remote - hidden by default */
+        .remote-container {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 200;
+            transform: translateX(250px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .remote-container.visible {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Remote MAP button */
+        .remote-btn.map {
+            background: linear-gradient(180deg, #4a2a6a 0%, #2a1a4a 100%);
+            color: #da70d6;
+            flex: 1;
+        }
+
+        .remote-btn.map:hover {
+            background: linear-gradient(180deg, #5a3a7a 0%, #3a2a5a 100%);
+            color: #fff;
+        }
+
+        /* World Map Overlay */
+        .map-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            overflow: auto;
+        }
+
+        .map-overlay.active {
+            display: flex;
+            flex-direction: column;
+            animation: mapFadeIn 0.3s ease-out;
+        }
+
+        @keyframes mapFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .map-header {
+            text-align: center;
+            padding: 20px 20px 15px;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0px,
+                    rgba(139, 69, 19, 0.05) 1px,
+                    transparent 2px,
+                    transparent 4px
+                ),
+                linear-gradient(180deg,
+                    #654321 0%,
+                    #8B4513 50%,
+                    #654321 100%
+                );
+            border-bottom: 4px solid #d4af37;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .map-title {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 36px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(255,215,0,0.3);
+            margin-bottom: 8px;
+            letter-spacing: 6px;
+            font-weight: bold;
+        }
+
+        .map-subtitle {
+            color: #f4e4bc;
+            font-size: 15px;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+        }
+
+        .map-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(145deg, #d4af37 0%, #b8860b 50%, #8b6914 100%);
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            color: #4a3728;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.3);
+            transition: all 0.2s;
+        }
+
+        .map-close:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            background: linear-gradient(145deg, #ffd700 0%, #d4af37 50%, #b8860b 100%);
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            /* Woodgrain background like an old TV cabinet */
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0px,
+                    rgba(139, 69, 19, 0.03) 1px,
+                    transparent 2px,
+                    transparent 4px
+                ),
+                linear-gradient(180deg,
+                    #5d4037 0%,
+                    #6d4c41 20%,
+                    #8d6e63 50%,
+                    #6d4c41 80%,
+                    #4e342e 100%
+                );
+            padding: 20px;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+        }
+
+        .world-map {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            /* Vintage parchment/map look */
+            background: linear-gradient(135deg, #f4e4bc 0%, #e8d5a3 50%, #d4c28a 100%);
+            border-radius: 8px;
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.4),
+                inset 0 0 60px rgba(139, 69, 19, 0.2);
+            border: 8px solid #8B4513;
+            border-image: linear-gradient(135deg, #a0522d, #8B4513, #654321, #8B4513) 1;
+        }
+
+        /* Vintage paper texture overlay */
+        .world-map::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(139, 69, 19, 0.05) 100%);
+            pointer-events: none;
+            z-index: 3;
+            border-radius: 4px;
+        }
+
+        /* Decorative compass rose hint */
+        .world-map::after {
+            content: '🧭';
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 40px;
+            opacity: 0.4;
+            z-index: 2;
+            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
+        }
+
+        /* Map image layer */
+        .map-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.rawpixel.com/image_png_social_landscape/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvam9iNjc5LTEyMy1wLWwxNjd4NHAzLnBuZw.png');
+            background-size: 95% auto;
+            background-position: center 45%;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        /* Marker container - positioned to match map image */
+        .markers-container {
+            position: absolute;
+            top: 0;
+            left: 2.5%;
+            width: 95%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        /* TV Marker on map - vintage pushpin style */
+        .map-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), z-index 0s;
+            user-select: none;
+        }
+
+        .map-marker:hover {
+            z-index: 100;
+            transform: translate(-50%, -50%) scale(1.4) rotate(-5deg);
+        }
+
+        .map-marker:active {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .marker-icon {
+            font-size: 28px;
+            display: block;
+            filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.4));
+            animation: markerBob 3s ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+            pointer-events: none;
+        }
+
+        @keyframes markerBob {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-3px) rotate(2deg); }
+            75% { transform: translateY(-3px) rotate(-2deg); }
+        }
+
+        .map-marker.has-working .marker-icon {
+            filter: drop-shadow(0 0 12px #22c55e) drop-shadow(2px 3px 3px rgba(0,0,0,0.4));
+        }
+
+        .map-marker.no-working .marker-icon {
+            filter: grayscale(0.7) drop-shadow(2px 3px 3px rgba(0,0,0,0.4));
+            opacity: 0.5;
+        }
+
+        /* Vintage tooltip */
+        .marker-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #f5f5dc 0%, #e8dcc4 100%);
+            border: 3px solid #8B4513;
+            border-radius: 4px;
+            padding: 10px 14px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+            margin-bottom: 8px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+            font-family: 'Georgia', serif;
+        }
+
+        .map-marker:hover .marker-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .marker-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #8B4513;
+        }
+
+        .tooltip-name {
+            color: #4a3728;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+        }
+
+        .tooltip-count {
+            font-size: 12px;
+            color: #2d5016;
+        }
+
+        .tooltip-count .failed {
+            color: #8b0000;
+        }
+
+        /* Vintage grid lines */
+        .map-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.15;
+            background-image:
+                linear-gradient(to right, #8B4513 1px, transparent 1px),
+                linear-gradient(to bottom, #8B4513 1px, transparent 1px);
+            background-size: 10% 10%;
+            z-index: 2;
+        }
+
+        /* Vintage scanline - like old map being scanned */
+        .map-scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #d4af37, #ffd700, #d4af37, transparent);
+            opacity: 0.4;
+            animation: scanline 5s linear infinite;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        @keyframes scanline {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .map-legend {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 12px 20px;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0px,
+                    rgba(139, 69, 19, 0.05) 1px,
+                    transparent 2px,
+                    transparent 4px
+                ),
+                linear-gradient(180deg,
+                    #654321 0%,
+                    #8B4513 50%,
+                    #654321 100%
+                );
+            border-top: 4px solid #d4af37;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #f4e4bc;
+            font-family: 'Georgia', serif;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .legend-dot.working { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .legend-dot.scanning { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+        .legend-dot.unknown { background: #9ca3af; }
     </style>
 </head>
 <body>
@@ -568,6 +1188,8 @@
                 </div>
 
                 <div class="brand">CLASSIC TV</div>
+                <button class="remote-btn-tv" id="remote-btn-tv" title="Show/Hide Remote">REMOTE</button>
+                <button class="map-btn-tv" id="map-btn-tv" title="World Channel Map">MAP</button>
             </div>
 
             <div class="tv-legs">
@@ -577,10 +1199,76 @@
         </div>
     </div>
 
+    <!-- Cable Box Remote -->
+    <div class="remote-container">
+        <div class="remote-wire"></div>
+        <div class="remote">
+            <div class="remote-brand">CABLE BOX</div>
+            <div class="remote-display" id="remote-display">POWER OFF</div>
+            <div class="control-row">
+                <button class="remote-btn power" id="remote-power">POWER</button>
+            </div>
+            <div class="control-row">
+                <button class="remote-btn nav" id="remote-ch-dn">CH-</button>
+                <button class="remote-btn nav" id="remote-ch-up">CH+</button>
+            </div>
+            <div class="control-row">
+                <button class="remote-btn scan" id="remote-scan">SCAN</button>
+                <button class="remote-btn map" id="remote-map">🗺️ MAP</button>
+            </div>
+            <div class="scan-status" id="scan-status">
+                <span class="working" id="working-count">0</span> working /
+                <span class="failed" id="failed-count">0</span> failed
+            </div>
+            <div class="remote-section">
+                <div class="remote-section-label">Jump to Country</div>
+                <div class="letter-grid" id="letter-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- World Map Overlay -->
+    <div class="map-overlay" id="map-overlay">
+        <div class="map-header">
+            <div class="map-title">🌍 WORLD TV MAP 📺</div>
+            <div class="map-subtitle" id="map-subtitle">Click a country to watch!</div>
+            <button class="map-close" id="map-close">✕</button>
+        </div>
+        <div class="map-container" id="map-container">
+            <div class="world-map" id="world-map">
+                <!-- Map background image -->
+                <div class="map-background"></div>
+                <div class="map-grid"></div>
+                <div class="map-scanline"></div>
+                <div class="markers-container" id="markers-container">
+                    <!-- Markers will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+        <div class="map-legend">
+            <div class="legend-item">
+                <div class="legend-dot working"></div>
+                <span>Working Channels</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot scanning"></div>
+                <span>Still Scanning</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot unknown"></div>
+                <span>Not Yet Tested</span>
+            </div>
+        </div>
+    </div>
+
     <div class="instructions">
-        <kbd>←</kbd> <kbd>→</kbd> Change Channel &nbsp;&nbsp;
-        <kbd>↑</kbd> <kbd>↓</kbd> Volume &nbsp;&nbsp;
-        <kbd>Space</kbd> Power
+        <kbd>←</kbd> <kbd>→</kbd> Channel &nbsp;
+        <kbd>↑</kbd> <kbd>↓</kbd> Volume &nbsp;
+        <kbd>Space</kbd> Power &nbsp;
+        <kbd>R</kbd> Remote &nbsp;
+        <kbd>M</kbd> Map &nbsp;
+        <kbd>F</kbd> Fullscreen &nbsp;
+        <kbd>Esc</kbd> Exit
     </div>
 
     <script>
@@ -594,6 +1282,24 @@
                 this.hls = null;
                 this.channelDisplayTimeout = null;
                 this.infoDisplayTimeout = null;
+                this.countryIndex = {};
+                this.loadTimeout = null;
+
+                // Background scanning (independent) - parallel scanning
+                this.isScanning = false;
+                this.scanIndex = 0;
+                this.scanWorkers = []; // Multiple parallel scan workers
+                this.numScanWorkers = 3; // Scan 3 channels at once
+
+                // Channel status tracking (persisted)
+                this.failedChannels = new Set();
+                this.workingChannels = new Set();
+                this.workingList = []; // Ordered list of working channel indices
+                this.workingListIndex = 0; // Current position in working list
+                this.autoSkipAttempts = 0; // Track auto-skip to prevent infinite loops
+                this.maxAutoSkipAttempts = 20; // Max channels to try before giving up
+                this.foundFirstWorking = false; // Track if we've played first working channel
+                this.loadChannelStatus();
 
                 // DOM Elements
                 this.video = document.getElementById('video-player');
@@ -610,13 +1316,351 @@
                 this.channelKnob = document.getElementById('channel-knob');
                 this.volumeKnob = document.getElementById('volume-knob');
 
+                // Remote elements
+                this.remoteDisplay = document.getElementById('remote-display');
+                this.remotePower = document.getElementById('remote-power');
+                this.letterGrid = document.getElementById('letter-grid');
+                this.scanBtn = document.getElementById('remote-scan');
+                this.workingCountEl = document.getElementById('working-count');
+                this.failedCountEl = document.getElementById('failed-count');
+
+                // Map elements
+                this.mapOverlay = document.getElementById('map-overlay');
+                this.mapContainer = document.getElementById('map-container');
+                this.mapSubtitle = document.getElementById('map-subtitle');
+                this.mapBtnTv = document.getElementById('map-btn-tv');
+                this.mapBtnRemote = document.getElementById('remote-map');
+                this.mapClose = document.getElementById('map-close');
+                this.isMapOpen = false;
+
+                // Remote toggle
+                this.remoteContainer = document.querySelector('.remote-container');
+                this.remoteBtnTv = document.getElementById('remote-btn-tv');
+                this.isRemoteVisible = false;
+
                 this.init();
+            }
+
+            loadChannelStatus() {
+                try {
+                    const failed = localStorage.getItem('tv_failed');
+                    const working = localStorage.getItem('tv_working');
+                    if (failed) this.failedChannels = new Set(JSON.parse(failed));
+                    if (working) this.workingChannels = new Set(JSON.parse(working));
+                } catch(e) {}
+            }
+
+            saveChannelStatus() {
+                try {
+                    localStorage.setItem('tv_failed', JSON.stringify([...this.failedChannels]));
+                    localStorage.setItem('tv_working', JSON.stringify([...this.workingChannels]));
+                } catch(e) {}
+                this.rebuildWorkingList();
+            }
+
+            rebuildWorkingList() {
+                this.workingList = [];
+                for (let i = 0; i < this.channels.length; i++) {
+                    const ch = this.channels[i];
+                    if (ch && this.workingChannels.has(ch.name + ch.url)) {
+                        this.workingList.push(i);
+                    }
+                }
+            }
+
+            updateStatusDisplay() {
+                this.workingCountEl.textContent = this.workingChannels.size;
+                this.failedCountEl.textContent = this.failedChannels.size;
             }
 
             async init() {
                 await this.loadPlaylist();
+                this.rebuildWorkingList();
+                this.buildCountryIndex();
+                this.setupLetterButtons();
                 this.setupEventListeners();
+                this.setupRemoteListeners();
+                this.setupMapListeners();
                 this.updateVolumeKnob();
+                this.updateStatusDisplay();
+
+                // Auto power on
+                if (this.channels.length > 0) {
+                    this.isPoweredOn = true;
+                    this.powerBtn.classList.add('on');
+                    this.powerLed.classList.add('on');
+                    this.remotePower.classList.add('on');
+
+                    // If we have known working channels, play one immediately
+                    if (this.workingList.length > 0) {
+                        this.foundFirstWorking = true; // Already have working channels
+                        this.workingListIndex = Math.floor(Math.random() * this.workingList.length);
+                        this.currentChannel = this.workingList[this.workingListIndex];
+                        this.playChannel(this.currentChannel);
+                        this.updateRemoteDisplay(`${this.workingList.length} WORKING`);
+                    } else {
+                        // No known working channels - start scanning to find them
+                        this.foundFirstWorking = false;
+                        this.updateRemoteDisplay('SCANNING...');
+                        this.startScan();
+                    }
+                }
+            }
+
+            buildCountryIndex() {
+                this.countryIndex = {};
+                this.channels.forEach((channel, index) => {
+                    const country = (channel.group || '').trim();
+                    if (country) {
+                        const letter = country[0].toUpperCase();
+                        if (/[A-Z]/.test(letter)) {
+                            if (!this.countryIndex[letter]) {
+                                this.countryIndex[letter] = [];
+                            }
+                            this.countryIndex[letter].push({ index, country });
+                        }
+                    }
+                });
+            }
+
+            setupLetterButtons() {
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.className = 'remote-btn';
+                    btn.textContent = letter;
+                    btn.dataset.letter = letter;
+                    if (this.countryIndex[letter]?.length > 0) {
+                        btn.classList.add('has-channels');
+                        const countries = [...new Set(this.countryIndex[letter].map(c => c.country))];
+                        btn.title = countries.slice(0, 5).join(', ');
+                    }
+                    this.letterGrid.appendChild(btn);
+                });
+            }
+
+            setupRemoteListeners() {
+                this.remotePower.addEventListener('click', () => this.togglePower());
+                document.getElementById('remote-ch-up').addEventListener('click', () => this.nextChannel());
+                document.getElementById('remote-ch-dn').addEventListener('click', () => this.prevChannel());
+                this.scanBtn.addEventListener('click', () => this.toggleScan());
+                this.letterGrid.addEventListener('click', (e) => {
+                    if (e.target.dataset.letter) {
+                        this.jumpToLetter(e.target.dataset.letter);
+                    }
+                });
+            }
+
+            toggleScan() {
+                if (!this.isPoweredOn) {
+                    this.updateRemoteDisplay('POWER ON FIRST');
+                    return;
+                }
+                if (this.isScanning) {
+                    this.stopScan();
+                } else {
+                    this.startScan();
+                }
+            }
+
+            startScan() {
+                this.isScanning = true;
+                this.scanBtn.classList.add('scanning');
+                this.scanBtn.textContent = 'STOP';
+                this.scanIndex = 0;
+                this.initScanWorkers();
+                this.launchScanWorkers();
+            }
+
+            stopScan() {
+                this.isScanning = false;
+                this.scanBtn.classList.remove('scanning');
+                this.scanBtn.textContent = 'SCAN';
+                // Clean up all workers and remove video elements from DOM
+                this.scanWorkers.forEach(w => {
+                    clearTimeout(w.timeout);
+                    if (w.hls) w.hls.destroy();
+                    if (w.onPlaying) {
+                        w.video.removeEventListener('playing', w.onPlaying);
+                    }
+                    w.video.src = '';
+                    w.video.load();
+                    if (w.video.parentNode) {
+                        w.video.parentNode.removeChild(w.video);
+                    }
+                });
+                this.scanWorkers = [];
+            }
+
+            initScanWorkers() {
+                // Create parallel scan workers
+                this.scanWorkers = [];
+                for (let i = 0; i < this.numScanWorkers; i++) {
+                    const video = document.createElement('video');
+                    video.style.display = 'none';
+                    video.muted = true;
+                    document.body.appendChild(video);
+                    this.scanWorkers.push({ video, hls: null, timeout: null, index: -1 });
+                }
+            }
+
+            launchScanWorkers() {
+                // Launch all workers
+                this.scanWorkers.forEach(worker => this.scanWithWorker(worker));
+            }
+
+            getNextScanIndex() {
+                // Find next untested channel
+                while (this.scanIndex < this.channels.length) {
+                    const ch = this.channels[this.scanIndex];
+                    const key = ch.name + ch.url;
+                    if (!this.workingChannels.has(key) && !this.failedChannels.has(key)) {
+                        return this.scanIndex++;
+                    }
+                    this.scanIndex++;
+                }
+                return -1; // No more to scan
+            }
+
+            scanWithWorker(worker) {
+                if (!this.isScanning) return;
+
+                const index = this.getNextScanIndex();
+                if (index === -1) {
+                    // Check if all workers done
+                    const allDone = this.scanWorkers.every(w => w.index === -1);
+                    if (allDone) {
+                        this.updateRemoteDisplay('SCAN COMPLETE');
+                        this.stopScan();
+                    }
+                    return;
+                }
+
+                worker.index = index;
+                const channel = this.channels[index];
+                this.updateRemoteDisplay(`SCAN ${index + 1}/${this.channels.length}`);
+
+                // Clean up previous - remove old event listeners
+                clearTimeout(worker.timeout);
+                if (worker.hls) {
+                    worker.hls.destroy();
+                    worker.hls = null;
+                }
+                if (worker.onPlaying) {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                }
+                worker.video.src = '';
+
+                // 4 second timeout for faster scanning
+                worker.timeout = setTimeout(() => this.onWorkerFail(worker), 4000);
+
+                const url = channel.url;
+
+                // Set up success handler - store reference for cleanup
+                worker.onPlaying = () => {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                    worker.onPlaying = null;
+                    this.onWorkerSuccess(worker);
+                };
+                worker.video.addEventListener('playing', worker.onPlaying);
+
+                if (url.includes('.m3u8') && Hls.isSupported()) {
+                    worker.hls = new Hls({ enableWorker: false }); // Disable worker for speed
+                    worker.hls.loadSource(url);
+                    worker.hls.attachMedia(worker.video);
+                    worker.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        worker.video.play().catch(() => this.onWorkerFail(worker));
+                    });
+                    worker.hls.on(Hls.Events.ERROR, (e, data) => {
+                        if (data.fatal) this.onWorkerFail(worker);
+                    });
+                } else {
+                    worker.video.src = url;
+                    worker.video.play().catch(() => this.onWorkerFail(worker));
+                }
+            }
+
+            onWorkerSuccess(worker) {
+                if (!this.isScanning || worker.index === -1) return;
+                clearTimeout(worker.timeout);
+
+                const foundIndex = worker.index;
+                const ch = this.channels[foundIndex];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.workingChannels.add(key);
+                    this.failedChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+
+                    // If this is the first working channel found, play it immediately
+                    if (!this.foundFirstWorking) {
+                        this.foundFirstWorking = true;
+                        this.currentChannel = foundIndex;
+                        this.workingListIndex = this.workingList.indexOf(foundIndex);
+                        this.playChannel(foundIndex);
+                        this.updateRemoteDisplay(`FOUND CH ${foundIndex + 1}`);
+                    }
+                }
+
+                worker.index = -1;
+                // Immediately scan next
+                this.scanWithWorker(worker);
+            }
+
+            onWorkerFail(worker) {
+                if (!this.isScanning || worker.index === -1) return;
+                clearTimeout(worker.timeout);
+
+                // Clean up event listener
+                if (worker.onPlaying) {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                    worker.onPlaying = null;
+                }
+
+                const ch = this.channels[worker.index];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.failedChannels.add(key);
+                    this.workingChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                }
+
+                worker.index = -1;
+                // Immediately scan next
+                this.scanWithWorker(worker);
+            }
+
+            jumpToLetter(letter) {
+                if (!this.isPoweredOn) {
+                    this.updateRemoteDisplay('POWER OFF');
+                    return;
+                }
+
+                const entries = this.countryIndex[letter];
+                if (!entries || entries.length === 0) {
+                    this.updateRemoteDisplay(`No "${letter}" countries`);
+                    return;
+                }
+
+                // Find first non-failed channel for this letter
+                for (const entry of entries) {
+                    if (!this.isChannelFailed(entry.index)) {
+                        this.currentChannel = entry.index;
+                        this.playChannel(this.currentChannel);
+                        this.updateRemoteDisplay(`${letter} → ${this.channels[this.currentChannel].group}`);
+                        return;
+                    }
+                }
+
+                // All failed, just use first one
+                this.currentChannel = entries[0].index;
+                this.playChannel(this.currentChannel);
+                this.updateRemoteDisplay(`${letter} → ${this.channels[this.currentChannel].group}`);
+            }
+
+            updateRemoteDisplay(text) {
+                this.remoteDisplay.textContent = text;
             }
 
             async loadPlaylist() {
@@ -711,6 +1755,44 @@
 
                 // Keyboard controls
                 document.addEventListener('keydown', (e) => {
+                    // Escape closes map or exits fullscreen
+                    if (e.key === 'Escape') {
+                        if (this.isMapOpen) {
+                            this.closeMap();
+                            return;
+                        }
+                        return; // Let browser handle fullscreen exit
+                    }
+
+                    // M key for map
+                    if (e.key === 'm' || e.key === 'M') {
+                        if (!e.ctrlKey && !e.metaKey) {
+                            this.toggleMap();
+                            return;
+                        }
+                    }
+
+                    // R key for remote
+                    if (e.key === 'r' || e.key === 'R') {
+                        if (!e.ctrlKey && !e.metaKey) {
+                            this.toggleRemote();
+                            return;
+                        }
+                    }
+
+                    // F key for fullscreen
+                    if (e.key === 'f' || e.key === 'F') {
+                        if (!e.ctrlKey && !e.metaKey) {
+                            this.toggleFullscreen();
+                            return;
+                        }
+                    }
+
+                    // Letter keys A-Z for country jump (except F, M, R)
+                    if (/^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !['f','m','r'].includes(e.key.toLowerCase())) {
+                        this.jumpToLetter(e.key.toUpperCase());
+                        return;
+                    }
                     switch(e.key) {
                         case 'ArrowRight':
                             this.nextChannel();
@@ -744,11 +1826,24 @@
                     else this.volumeDown();
                 });
 
-                // Video events
+                // Video events for main player
                 this.video.addEventListener('playing', () => {
                     this.loading.classList.remove('active');
                     this.errorMessage.classList.remove('active');
                     this.staticEl.classList.remove('active');
+                    clearTimeout(this.loadTimeout);
+                    this.autoSkipAttempts = 0; // Reset skip counter on success
+                    // Mark as working when user watches it
+                    const ch = this.channels[this.currentChannel];
+                    if (ch) {
+                        const key = ch.name + ch.url;
+                        this.workingChannels.add(key);
+                        this.failedChannels.delete(key);
+                        this.saveChannelStatus();
+                        this.updateStatusDisplay();
+                        // Update display with channel info
+                        this.updateRemoteDisplay(`CH ${this.currentChannel + 1}`);
+                    }
                 });
 
                 this.video.addEventListener('waiting', () => {
@@ -756,8 +1851,317 @@
                 });
 
                 this.video.addEventListener('error', () => {
-                    this.showError();
+                    this.handleChannelError();
                 });
+
+                // Click on video to toggle fullscreen
+                this.video.addEventListener('click', () => {
+                    this.toggleFullscreen();
+                });
+            }
+
+            toggleFullscreen() {
+                if (!this.isPoweredOn) return;
+
+                const screen = document.querySelector('.screen');
+
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else if (document.webkitFullscreenElement) {
+                    document.webkitExitFullscreen();
+                } else {
+                    // Request fullscreen on the screen container for a better experience
+                    if (screen.requestFullscreen) {
+                        screen.requestFullscreen();
+                    } else if (screen.webkitRequestFullscreen) {
+                        screen.webkitRequestFullscreen();
+                    }
+                }
+            }
+
+            handleChannelError() {
+                // Mark current channel as failed
+                const ch = this.channels[this.currentChannel];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.failedChannels.add(key);
+                    this.workingChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                }
+
+                // Auto-skip to next channel (with limit to prevent infinite loop)
+                this.autoSkipAttempts++;
+                if (this.autoSkipAttempts < this.maxAutoSkipAttempts) {
+                    // If we have a working list, use it
+                    if (this.workingList.length > 0) {
+                        this.workingListIndex = (this.workingListIndex + 1) % this.workingList.length;
+                        this.currentChannel = this.workingList[this.workingListIndex];
+                        this.playChannel(this.currentChannel);
+                    } else {
+                        // No working list yet, try next channel sequentially
+                        this.currentChannel = (this.currentChannel + 1) % this.channels.length;
+                        this.playChannel(this.currentChannel);
+                    }
+                    this.updateRemoteDisplay('SEARCHING...');
+                } else {
+                    // Too many failures, show error and reset
+                    this.showError();
+                    this.autoSkipAttempts = 0;
+                    this.updateRemoteDisplay('NO SIGNAL');
+                }
+            }
+
+            // Map functionality
+            setupMapListeners() {
+                this.mapBtnTv.addEventListener('click', () => this.toggleMap());
+                this.mapBtnRemote.addEventListener('click', () => this.toggleMap());
+                this.mapClose.addEventListener('click', () => this.closeMap());
+                this.mapOverlay.addEventListener('click', (e) => {
+                    if (e.target === this.mapOverlay) this.closeMap();
+                });
+
+                // Remote toggle button
+                this.remoteBtnTv.addEventListener('click', () => this.toggleRemote());
+            }
+
+            toggleRemote() {
+                this.isRemoteVisible = !this.isRemoteVisible;
+                if (this.isRemoteVisible) {
+                    this.remoteContainer.classList.add('visible');
+                } else {
+                    this.remoteContainer.classList.remove('visible');
+                }
+            }
+
+            toggleMap() {
+                if (this.isMapOpen) {
+                    this.closeMap();
+                } else {
+                    this.openMap();
+                }
+            }
+
+            openMap() {
+                this.isMapOpen = true;
+                this.buildMapCards();
+                this.mapOverlay.classList.add('active');
+                this.updateRemoteDisplay('🗺️ MAP');
+            }
+
+            closeMap() {
+                this.isMapOpen = false;
+                this.mapOverlay.classList.remove('active');
+                if (this.isPoweredOn) {
+                    this.updateRemoteDisplay(`CH ${this.currentChannel + 1}`);
+                }
+            }
+
+            buildMapCards() {
+                const markersContainer = document.getElementById('markers-container');
+                // Remove old markers
+                markersContainer.innerHTML = '';
+
+                // Country coordinates for equirectangular 180° centered map
+                // Formula: x = (longitude + 180) / 360 * 100, y = (90 - latitude) / 180 * 100
+                const countryCoords = {
+                    // North America
+                    'USA': { x: 22, y: 28 }, 'United States': { x: 22, y: 28 },
+                    'Canada': { x: 22, y: 22 }, 'Mexico': { x: 20, y: 37 },
+                    // South America
+                    'Brazil': { x: 35, y: 56 }, 'Argentina': { x: 32, y: 67 },
+                    'Chile': { x: 30, y: 64 }, 'Colombia': { x: 29, y: 53 },
+                    'Peru': { x: 28, y: 56 }, 'Venezuela': { x: 31, y: 52 },
+                    'Ecuador': { x: 28, y: 51 }, 'Cuba': { x: 28, y: 38 },
+                    // Europe
+                    'UK': { x: 50, y: 21 }, 'United Kingdom': { x: 50, y: 21 },
+                    'Germany': { x: 53, y: 24 }, 'France': { x: 51, y: 26 },
+                    'Spain': { x: 49, y: 28 }, 'Italy': { x: 53, y: 28 },
+                    'Netherlands': { x: 51, y: 23 }, 'Belgium': { x: 51, y: 24 },
+                    'Portugal': { x: 47, y: 29 }, 'Poland': { x: 55, y: 23 },
+                    'Sweden': { x: 54, y: 17 }, 'Norway': { x: 53, y: 16 },
+                    'Denmark': { x: 53, y: 20 }, 'Finland': { x: 56, y: 17 },
+                    'Austria': { x: 54, y: 26 }, 'Switzerland': { x: 52, y: 26 },
+                    'Greece': { x: 55, y: 29 }, 'Turkey': { x: 58, y: 29 },
+                    'Russia': { x: 72, y: 18 }, 'Ukraine': { x: 58, y: 24 },
+                    'Romania': { x: 56, y: 26 }, 'Bulgaria': { x: 56, y: 28 },
+                    'Hungary': { x: 55, y: 26 }, 'Czech': { x: 54, y: 24 },
+                    'Slovakia': { x: 55, y: 25 }, 'Croatia': { x: 54, y: 27 },
+                    'Serbia': { x: 55, y: 27 }, 'Slovenia': { x: 54, y: 26 },
+                    'Ireland': { x: 48, y: 22 }, 'Iceland': { x: 44, y: 14 },
+                    'Albania': { x: 55, y: 29 }, 'Latvia': { x: 56, y: 19 },
+                    'Lithuania': { x: 56, y: 20 }, 'Estonia': { x: 56, y: 18 },
+                    'Luxembourg': { x: 51, y: 24 },
+                    // Asia
+                    'China': { x: 80, y: 32 }, 'Japan': { x: 89, y: 30 },
+                    'Korea': { x: 86, y: 31 }, 'South Korea': { x: 86, y: 31 },
+                    'India': { x: 72, y: 38 }, 'Pakistan': { x: 69, y: 34 },
+                    'Bangladesh': { x: 74, y: 38 }, 'Thailand': { x: 78, y: 43 },
+                    'Vietnam': { x: 79, y: 44 }, 'Indonesia': { x: 82, y: 52 },
+                    'Malaysia': { x: 78, y: 52 }, 'Singapore': { x: 79, y: 51 },
+                    'Philippines': { x: 84, y: 43 }, 'Taiwan': { x: 84, y: 37 },
+                    // Oceania
+                    'Australia': { x: 87, y: 65 }, 'New Zealand': { x: 97, y: 71 },
+                    // Africa
+                    'Egypt': { x: 58, y: 35 }, 'South Africa': { x: 56, y: 66 },
+                    'Morocco': { x: 48, y: 33 }, 'Algeria': { x: 51, y: 35 },
+                    'Tunisia': { x: 53, y: 32 }, 'Nigeria': { x: 52, y: 45 },
+                    'Kenya': { x: 60, y: 51 }, 'Ethiopia': { x: 60, y: 47 },
+                    // Middle East
+                    'Israel': { x: 59, y: 33 }, 'Saudi Arabia': { x: 62, y: 38 },
+                    'UAE': { x: 65, y: 38 }, 'Iran': { x: 64, y: 33 },
+                    'Iraq': { x: 62, y: 33 }, 'Afghanistan': { x: 68, y: 33 },
+                    // Special
+                    'International': { x: 50, y: 45 }, 'Unknown': { x: 50, y: 85 }
+                };
+
+                // Build country data
+                const countryData = {};
+                this.channels.forEach((channel, index) => {
+                    const country = (channel.group || 'Unknown').trim();
+                    if (!countryData[country]) {
+                        countryData[country] = {
+                            name: country,
+                            total: 0,
+                            working: 0,
+                            failed: 0,
+                            firstIndex: index
+                        };
+                    }
+                    countryData[country].total++;
+                    const key = channel.name + channel.url;
+                    if (this.workingChannels.has(key)) {
+                        countryData[country].working++;
+                    } else if (this.failedChannels.has(key)) {
+                        countryData[country].failed++;
+                    }
+                });
+
+                // Update subtitle
+                const totalWorking = [...this.workingChannels].length;
+                const countriesWithWorking = Object.values(countryData).filter(c => c.working > 0).length;
+                this.mapSubtitle.textContent = `📡 ${totalWorking} working channels across ${countriesWithWorking} countries!`;
+
+                // Create markers
+                let idx = 0;
+                for (const [name, data] of Object.entries(countryData)) {
+                    const coords = countryCoords[name] || this.guessCoordinates(name);
+                    if (!coords) continue;
+
+                    const marker = document.createElement('div');
+                    marker.className = 'map-marker';
+                    if (data.working > 0) {
+                        marker.classList.add('has-working');
+                    } else {
+                        marker.classList.add('no-working');
+                    }
+                    marker.style.left = `${coords.x}%`;
+                    marker.style.top = `${coords.y}%`;
+                    marker.style.setProperty('--delay', `${(idx % 20) * 0.1}s`);
+
+                    const flag = this.getCountryFlag(name);
+
+                    marker.innerHTML = `
+                        <span class="marker-icon">${flag}📺</span>
+                        <div class="marker-tooltip">
+                            <div class="tooltip-name">${name}</div>
+                            <div class="tooltip-count">
+                                ✅ ${data.working} working
+                                ${data.failed > 0 ? `<span class="failed">❌ ${data.failed} failed</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    // Robust click handler with event capture
+                    const countryName = name;
+                    const firstIdx = data.firstIndex;
+                    marker.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log(`Clicked: ${countryName}, firstIndex: ${firstIdx}`);
+                        this.jumpToCountry(countryName, firstIdx);
+                    }, true);
+
+                    markersContainer.appendChild(marker);
+                    idx++;
+                }
+            }
+
+            guessCoordinates(country) {
+                // Try to guess based on partial matches (coordinates for equirectangular 180° map)
+                const countryLower = country.toLowerCase();
+                if (countryLower.includes('latin') || countryLower.includes('latino')) return { x: 28, y: 52 };
+                if (countryLower.includes('arab') || countryLower.includes('middle east')) return { x: 62, y: 35 };
+                if (countryLower.includes('africa')) return { x: 55, y: 50 };
+                if (countryLower.includes('asia')) return { x: 78, y: 35 };
+                if (countryLower.includes('europe')) return { x: 53, y: 25 };
+                if (countryLower.includes('america')) return { x: 25, y: 35 };
+                if (countryLower.includes('oceania') || countryLower.includes('pacific')) return { x: 90, y: 60 };
+                // Default position for unknown - bottom of map
+                return { x: 50 + Math.random() * 10 - 5, y: 88 };
+            }
+
+            getCountryFlag(country) {
+                const flagMap = {
+                    'USA': '🇺🇸', 'United States': '🇺🇸', 'UK': '🇬🇧', 'United Kingdom': '🇬🇧',
+                    'Canada': '🇨🇦', 'Germany': '🇩🇪', 'France': '🇫🇷', 'Spain': '🇪🇸',
+                    'Italy': '🇮🇹', 'Japan': '🇯🇵', 'China': '🇨🇳', 'Russia': '🇷🇺',
+                    'Brazil': '🇧🇷', 'Mexico': '🇲🇽', 'Australia': '🇦🇺', 'India': '🇮🇳',
+                    'Netherlands': '🇳🇱', 'Portugal': '🇵🇹', 'Poland': '🇵🇱', 'Sweden': '🇸🇪',
+                    'Turkey': '🇹🇷', 'Korea': '🇰🇷', 'South Korea': '🇰🇷', 'Argentina': '🇦🇷',
+                    'Chile': '🇨🇱', 'Colombia': '🇨🇴', 'Greece': '🇬🇷', 'Romania': '🇷🇴',
+                    'Belgium': '🇧🇪', 'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Norway': '🇳🇴',
+                    'Denmark': '🇩🇰', 'Finland': '🇫🇮', 'Ireland': '🇮🇪', 'Israel': '🇮🇱',
+                    'Saudi Arabia': '🇸🇦', 'UAE': '🇦🇪', 'Egypt': '🇪🇬', 'South Africa': '🇿🇦',
+                    'Indonesia': '🇮🇩', 'Thailand': '🇹🇭', 'Vietnam': '🇻🇳', 'Philippines': '🇵🇭',
+                    'Malaysia': '🇲🇾', 'Singapore': '🇸🇬', 'New Zealand': '🇳🇿', 'Czech': '🇨🇿',
+                    'Hungary': '🇭🇺', 'Ukraine': '🇺🇦', 'Croatia': '🇭🇷', 'Serbia': '🇷🇸',
+                    'Bulgaria': '🇧🇬', 'Slovakia': '🇸🇰', 'Slovenia': '🇸🇮', 'Latvia': '🇱🇻',
+                    'Lithuania': '🇱🇹', 'Estonia': '🇪🇪', 'Iceland': '🇮🇸', 'Luxembourg': '🇱🇺',
+                    'Albania': '🇦🇱', 'Morocco': '🇲🇦', 'Tunisia': '🇹🇳', 'Algeria': '🇩🇿',
+                    'Pakistan': '🇵🇰', 'Bangladesh': '🇧🇩', 'Iran': '🇮🇷', 'Iraq': '🇮🇶',
+                    'Peru': '🇵🇪', 'Venezuela': '🇻🇪', 'Ecuador': '🇪🇨', 'Cuba': '🇨🇺',
+                    'Taiwan': '🇹🇼', 'Nigeria': '🇳🇬', 'Kenya': '🇰🇪', 'Ethiopia': '🇪🇹',
+                    'Afghanistan': '🇦🇫', 'International': '🌍', 'Unknown': '❓'
+                };
+                for (const [key, flag] of Object.entries(flagMap)) {
+                    if (country.toLowerCase().includes(key.toLowerCase())) return flag;
+                }
+                return '🌐';
+            }
+
+            jumpToCountry(countryName, fallbackIndex) {
+                console.log(`jumpToCountry called: ${countryName}, fallback: ${fallbackIndex}`);
+
+                // Find a working channel for this country
+                let foundWorking = false;
+                for (let i = 0; i < this.channels.length; i++) {
+                    const ch = this.channels[i];
+                    if (ch.group === countryName) {
+                        const key = ch.name + ch.url;
+                        if (this.workingChannels.has(key)) {
+                            console.log(`Found working channel: ${ch.name} at index ${i}`);
+                            this.currentChannel = i;
+                            foundWorking = true;
+                            this.closeMap();
+                            this.playChannel(i);
+                            this.updateRemoteDisplay(`→ ${countryName}`);
+                            return;
+                        }
+                    }
+                }
+
+                // No working channels found, use first channel for this country
+                console.log(`No working channel found for ${countryName}, using fallback index ${fallbackIndex}`);
+                if (fallbackIndex >= 0 && fallbackIndex < this.channels.length) {
+                    this.currentChannel = fallbackIndex;
+                    this.closeMap();
+                    this.playChannel(fallbackIndex);
+                    this.updateRemoteDisplay(`→ ${countryName}`);
+                } else {
+                    console.error(`Invalid fallback index: ${fallbackIndex}`);
+                    this.closeMap();
+                }
             }
 
             togglePower() {
@@ -773,12 +2177,14 @@
             powerOn() {
                 this.powerBtn.classList.add('on');
                 this.powerLed.classList.add('on');
+                this.remotePower.classList.add('on');
                 this.staticEl.classList.add('active');
+                this.updateRemoteDisplay('POWERING ON...');
 
-                // Small delay before playing
                 setTimeout(() => {
                     if (this.channels.length > 0) {
                         this.playChannel(this.currentChannel);
+                        this.updateRemoteDisplay(`${this.channels.length} CHANNELS`);
                     }
                 }, 500);
             }
@@ -786,11 +2192,13 @@
             powerOff() {
                 this.powerBtn.classList.remove('on');
                 this.powerLed.classList.remove('on');
+                this.remotePower.classList.remove('on');
                 this.staticEl.classList.remove('active');
                 this.loading.classList.remove('active');
                 this.errorMessage.classList.remove('active');
                 this.channelDisplay.classList.remove('visible');
                 this.channelInfo.classList.remove('visible');
+                this.updateRemoteDisplay('POWER OFF');
 
                 if (this.hls) {
                     this.hls.destroy();
@@ -802,21 +2210,45 @@
 
             nextChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
-                this.currentChannel = (this.currentChannel + 1) % this.channels.length;
+
+                // Use working list if available
+                if (this.workingList.length > 0) {
+                    this.workingListIndex = (this.workingListIndex + 1) % this.workingList.length;
+                    this.currentChannel = this.workingList[this.workingListIndex];
+                } else {
+                    this.currentChannel = (this.currentChannel + 1) % this.channels.length;
+                }
+
                 this.playChannel(this.currentChannel);
                 this.animateChannelKnob(1);
             }
 
             prevChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
-                this.currentChannel = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
+
+                // Use working list if available
+                if (this.workingList.length > 0) {
+                    this.workingListIndex = (this.workingListIndex - 1 + this.workingList.length) % this.workingList.length;
+                    this.currentChannel = this.workingList[this.workingListIndex];
+                } else {
+                    this.currentChannel = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
+                }
+
                 this.playChannel(this.currentChannel);
                 this.animateChannelKnob(-1);
+            }
+
+            isChannelFailed(index) {
+                const ch = this.channels[index];
+                if (!ch) return false;
+                return this.failedChannels.has(ch.name + ch.url);
             }
 
             playChannel(index) {
                 const channel = this.channels[index];
                 if (!channel) return;
+
+                clearTimeout(this.loadTimeout);
 
                 // Show static during channel change
                 this.staticEl.classList.add('active');
@@ -832,6 +2264,11 @@
                     this.hls.destroy();
                     this.hls = null;
                 }
+
+                // Timeout to auto-skip if channel doesn't load
+                this.loadTimeout = setTimeout(() => {
+                    this.handleChannelError();
+                }, 8000); // 8 second timeout
 
                 const url = channel.url;
 
@@ -849,7 +2286,7 @@
                         });
                         this.hls.on(Hls.Events.ERROR, (event, data) => {
                             if (data.fatal) {
-                                this.showError();
+                                this.handleChannelError();
                             }
                         });
                     } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
