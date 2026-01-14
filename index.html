@@ -873,28 +873,20 @@
             min-height: 500px;
         }
 
-        /* Separate background layer for map image with filter */
+        /* Separate background layer for map image */
         .map-background {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #0d2137;
+            background-color: #0a1628;
+            background-image: url('https://images.rawpixel.com/image_png_social_landscape/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvam9iNjc5LTEyMy1wLWwxNjd4NHAzLnBuZw.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: brightness(0.6) saturate(1.2) hue-rotate(160deg);
             z-index: 0;
-        }
-
-        /* Inline SVG world map - reliable, no CORS issues */
-        .map-background svg {
-            width: 100%;
-            height: 100%;
-            opacity: 0.6;
-        }
-
-        .map-background svg path {
-            fill: #1e5a3a;
-            stroke: #2a7a4a;
-            stroke-width: 0.5;
         }
 
         /* Marker container - no filter, above background */
@@ -1152,48 +1144,8 @@
         </div>
         <div class="map-container" id="map-container">
             <div class="world-map" id="world-map">
-                <!-- Map background with inline SVG - no CORS issues -->
-                <!-- viewBox matches percentage coordinates (0-100) for easy marker alignment -->
-                <div class="map-background">
-                    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <!-- North America (x: 10-30, y: 20-45) -->
-                        <path d="M10,22 L12,18 L18,17 L25,20 L30,25 L32,32 L28,40 L22,45 L15,42 L10,35 L8,28 Z"/>
-                        <!-- Canada/Alaska -->
-                        <path d="M8,15 L15,12 L25,14 L30,18 L28,22 L20,20 L12,18 Z"/>
-                        <!-- Greenland -->
-                        <path d="M38,10 L45,8 L48,14 L44,18 L38,16 Z"/>
-                        <!-- Central America/Mexico -->
-                        <path d="M15,38 L22,36 L25,42 L22,48 L17,45 Z"/>
-                        <!-- South America -->
-                        <path d="M25,50 L32,48 L38,52 L40,62 L38,72 L32,78 L26,75 L24,65 L25,55 Z"/>
-                        <!-- Europe -->
-                        <path d="M46,20 L48,18 L55,18 L58,22 L56,28 L52,30 L48,28 L45,25 Z"/>
-                        <!-- UK/Ireland -->
-                        <path d="M46,22 L48,20 L49,24 L47,26 Z"/>
-                        <!-- Scandinavia -->
-                        <path d="M52,12 L56,10 L58,16 L55,20 L52,18 Z"/>
-                        <!-- Russia -->
-                        <path d="M58,12 L70,10 L85,12 L92,18 L88,25 L78,28 L68,26 L60,22 Z"/>
-                        <!-- Africa -->
-                        <path d="M48,32 L56,30 L62,35 L64,48 L60,60 L54,68 L48,65 L45,52 L46,40 Z"/>
-                        <!-- Middle East -->
-                        <path d="M58,30 L66,28 L70,34 L68,40 L62,42 L58,38 Z"/>
-                        <!-- India -->
-                        <path d="M68,35 L75,32 L78,40 L75,50 L70,48 L68,42 Z"/>
-                        <!-- Southeast Asia -->
-                        <path d="M75,42 L82,40 L85,48 L82,55 L76,52 Z"/>
-                        <!-- China/East Asia -->
-                        <path d="M75,25 L85,22 L90,28 L88,35 L80,38 L75,32 Z"/>
-                        <!-- Japan -->
-                        <path d="M88,28 L92,26 L93,34 L90,38 L87,34 Z"/>
-                        <!-- Indonesia -->
-                        <path d="M78,52 L88,50 L92,55 L88,60 L80,58 Z"/>
-                        <!-- Australia -->
-                        <path d="M82,62 L92,60 L96,68 L92,78 L84,76 L80,70 Z"/>
-                        <!-- New Zealand -->
-                        <path d="M95,75 L98,72 L99,80 L96,82 Z"/>
-                    </svg>
-                </div>
+                <!-- Map background image -->
+                <div class="map-background"></div>
                 <div class="map-grid"></div>
                 <div class="map-scanline"></div>
                 <div class="markers-container" id="markers-container">
