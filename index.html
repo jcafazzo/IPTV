@@ -636,6 +636,31 @@
         .remote-btn.nav {
             flex: 1;
         }
+
+        .remote-btn.scan {
+            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a2a 100%);
+            color: #6b9fff;
+            flex: 1;
+        }
+
+        .remote-btn.scan.scanning {
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scan-status {
+            font-size: 8px;
+            color: #666;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .scan-status .working { color: #4ade80; }
+        .scan-status .failed { color: #ff6b6b; }
     </style>
 </head>
 <body>
@@ -708,6 +733,13 @@
                 <button class="remote-btn nav" id="remote-ch-dn">CH-</button>
                 <button class="remote-btn nav" id="remote-ch-up">CH+</button>
             </div>
+            <div class="control-row">
+                <button class="remote-btn scan" id="remote-scan">SCAN</button>
+            </div>
+            <div class="scan-status" id="scan-status">
+                <span class="working" id="working-count">0</span> working /
+                <span class="failed" id="failed-count">0</span> failed
+            </div>
             <div class="remote-section">
                 <div class="remote-section-label">Jump to Country</div>
                 <div class="letter-grid" id="letter-grid"></div>
@@ -734,6 +766,14 @@
                 this.channelDisplayTimeout = null;
                 this.infoDisplayTimeout = null;
                 this.countryIndex = {};
+                this.loadTimeout = null;
+                this.isScanning = false;
+                this.scanIndex = 0;
+
+                // Channel status tracking (persisted)
+                this.failedChannels = new Set();
+                this.workingChannels = new Set();
+                this.loadChannelStatus();
 
                 // DOM Elements
                 this.video = document.getElementById('video-player');
@@ -754,8 +794,32 @@
                 this.remoteDisplay = document.getElementById('remote-display');
                 this.remotePower = document.getElementById('remote-power');
                 this.letterGrid = document.getElementById('letter-grid');
+                this.scanBtn = document.getElementById('remote-scan');
+                this.workingCountEl = document.getElementById('working-count');
+                this.failedCountEl = document.getElementById('failed-count');
 
                 this.init();
+            }
+
+            loadChannelStatus() {
+                try {
+                    const failed = localStorage.getItem('tv_failed');
+                    const working = localStorage.getItem('tv_working');
+                    if (failed) this.failedChannels = new Set(JSON.parse(failed));
+                    if (working) this.workingChannels = new Set(JSON.parse(working));
+                } catch(e) {}
+            }
+
+            saveChannelStatus() {
+                try {
+                    localStorage.setItem('tv_failed', JSON.stringify([...this.failedChannels]));
+                    localStorage.setItem('tv_working', JSON.stringify([...this.workingChannels]));
+                } catch(e) {}
+            }
+
+            updateStatusDisplay() {
+                this.workingCountEl.textContent = this.workingChannels.size;
+                this.failedCountEl.textContent = this.failedChannels.size;
             }
 
             async init() {
@@ -765,6 +829,7 @@
                 this.setupEventListeners();
                 this.setupRemoteListeners();
                 this.updateVolumeKnob();
+                this.updateStatusDisplay();
             }
 
             buildCountryIndex() {
@@ -802,6 +867,7 @@
                 this.remotePower.addEventListener('click', () => this.togglePower());
                 document.getElementById('remote-ch-up').addEventListener('click', () => this.nextChannel());
                 document.getElementById('remote-ch-dn').addEventListener('click', () => this.prevChannel());
+                this.scanBtn.addEventListener('click', () => this.toggleScan());
                 this.letterGrid.addEventListener('click', (e) => {
                     if (e.target.dataset.letter) {
                         this.jumpToLetter(e.target.dataset.letter);
@@ -809,16 +875,85 @@
                 });
             }
 
+            toggleScan() {
+                if (!this.isPoweredOn) {
+                    this.updateRemoteDisplay('POWER ON FIRST');
+                    return;
+                }
+                if (this.isScanning) {
+                    this.stopScan();
+                } else {
+                    this.startScan();
+                }
+            }
+
+            startScan() {
+                this.isScanning = true;
+                this.scanBtn.classList.add('scanning');
+                this.scanBtn.textContent = 'STOP';
+                this.scanIndex = this.currentChannel;
+                this.scanNext();
+            }
+
+            stopScan() {
+                this.isScanning = false;
+                this.scanBtn.classList.remove('scanning');
+                this.scanBtn.textContent = 'SCAN';
+                clearTimeout(this.loadTimeout);
+            }
+
+            scanNext() {
+                if (!this.isScanning) return;
+
+                // Find next untested channel
+                let found = false;
+                let startIndex = this.scanIndex;
+                for (let i = 0; i < this.channels.length; i++) {
+                    const idx = (startIndex + i) % this.channels.length;
+                    const ch = this.channels[idx];
+                    const key = ch.name + ch.url;
+                    if (!this.workingChannels.has(key) && !this.failedChannels.has(key)) {
+                        this.scanIndex = idx;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    this.updateRemoteDisplay('SCAN COMPLETE');
+                    this.stopScan();
+                    return;
+                }
+
+                this.currentChannel = this.scanIndex;
+                this.updateRemoteDisplay(`SCAN ${this.scanIndex + 1}/${this.channels.length}`);
+                this.playChannel(this.scanIndex, true);
+            }
+
             jumpToLetter(letter) {
                 if (!this.isPoweredOn) {
                     this.updateRemoteDisplay('POWER OFF');
                     return;
                 }
+                if (this.isScanning) this.stopScan();
+
                 const entries = this.countryIndex[letter];
                 if (!entries || entries.length === 0) {
                     this.updateRemoteDisplay(`No "${letter}" countries`);
                     return;
                 }
+
+                // Find first non-failed channel for this letter
+                for (const entry of entries) {
+                    if (!this.isChannelFailed(entry.index)) {
+                        this.currentChannel = entry.index;
+                        this.playChannel(this.currentChannel);
+                        this.updateRemoteDisplay(`${letter} → ${this.channels[this.currentChannel].group}`);
+                        return;
+                    }
+                }
+
+                // All failed, just use first one
                 this.currentChannel = entries[0].index;
                 this.playChannel(this.currentChannel);
                 this.updateRemoteDisplay(`${letter} → ${this.channels[this.currentChannel].group}`);
@@ -963,6 +1098,8 @@
                     this.loading.classList.remove('active');
                     this.errorMessage.classList.remove('active');
                     this.staticEl.classList.remove('active');
+                    clearTimeout(this.loadTimeout);
+                    this.markChannelWorking();
                 });
 
                 this.video.addEventListener('waiting', () => {
@@ -970,8 +1107,42 @@
                 });
 
                 this.video.addEventListener('error', () => {
-                    this.showError();
+                    this.markChannelFailed();
                 });
+            }
+
+            markChannelWorking() {
+                const ch = this.channels[this.currentChannel];
+                if (!ch) return;
+                const key = ch.name + ch.url;
+                this.workingChannels.add(key);
+                this.failedChannels.delete(key);
+                this.saveChannelStatus();
+                this.updateStatusDisplay();
+
+                if (this.isScanning) {
+                    // Move to next channel after brief pause
+                    setTimeout(() => {
+                        this.scanIndex++;
+                        this.scanNext();
+                    }, 2000);
+                }
+            }
+
+            markChannelFailed() {
+                const ch = this.channels[this.currentChannel];
+                if (!ch) return;
+                const key = ch.name + ch.url;
+                this.failedChannels.add(key);
+                this.workingChannels.delete(key);
+                this.saveChannelStatus();
+                this.updateStatusDisplay();
+                this.showError();
+
+                if (this.isScanning) {
+                    this.scanIndex++;
+                    this.scanNext();
+                }
             }
 
             togglePower() {
@@ -1020,21 +1191,45 @@
 
             nextChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
-                this.currentChannel = (this.currentChannel + 1) % this.channels.length;
+                if (this.isScanning) this.stopScan();
+
+                // Skip failed channels
+                let attempts = 0;
+                do {
+                    this.currentChannel = (this.currentChannel + 1) % this.channels.length;
+                    attempts++;
+                } while (this.isChannelFailed(this.currentChannel) && attempts < this.channels.length);
+
                 this.playChannel(this.currentChannel);
                 this.animateChannelKnob(1);
             }
 
             prevChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
-                this.currentChannel = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
+                if (this.isScanning) this.stopScan();
+
+                // Skip failed channels
+                let attempts = 0;
+                do {
+                    this.currentChannel = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
+                    attempts++;
+                } while (this.isChannelFailed(this.currentChannel) && attempts < this.channels.length);
+
                 this.playChannel(this.currentChannel);
                 this.animateChannelKnob(-1);
             }
 
-            playChannel(index) {
+            isChannelFailed(index) {
+                const ch = this.channels[index];
+                if (!ch) return false;
+                return this.failedChannels.has(ch.name + ch.url);
+            }
+
+            playChannel(index, isScanning = false) {
                 const channel = this.channels[index];
                 if (!channel) return;
+
+                clearTimeout(this.loadTimeout);
 
                 // Show static during channel change
                 this.staticEl.classList.add('active');
@@ -1050,6 +1245,12 @@
                     this.hls.destroy();
                     this.hls = null;
                 }
+
+                // Set timeout to mark as failed if no response
+                const timeout = isScanning ? 8000 : 15000;
+                this.loadTimeout = setTimeout(() => {
+                    this.markChannelFailed();
+                }, timeout);
 
                 const url = channel.url;
 
@@ -1067,7 +1268,7 @@
                         });
                         this.hls.on(Hls.Events.ERROR, (event, data) => {
                             if (data.fatal) {
-                                this.showError();
+                                this.markChannelFailed();
                             }
                         });
                     } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
