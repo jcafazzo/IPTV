@@ -676,7 +676,6 @@
                 <div class="screen-container">
                     <div class="screen">
                         <video id="video-player" playsinline></video>
-                        <video id="scan-video" playsinline style="display:none"></video>
                         <div class="static" id="static"></div>
                         <div class="channel-display" id="channel-display">CH 01</div>
                         <div class="loading" id="loading"></div>
@@ -769,20 +768,21 @@
                 this.countryIndex = {};
                 this.loadTimeout = null;
 
-                // Background scanning (independent)
+                // Background scanning (independent) - parallel scanning
                 this.isScanning = false;
                 this.scanIndex = 0;
-                this.scanHls = null;
-                this.scanTimeout = null;
+                this.scanWorkers = []; // Multiple parallel scan workers
+                this.numScanWorkers = 3; // Scan 3 channels at once
 
                 // Channel status tracking (persisted)
                 this.failedChannels = new Set();
                 this.workingChannels = new Set();
+                this.workingList = []; // Ordered list of working channel indices
+                this.workingListIndex = 0; // Current position in working list
                 this.loadChannelStatus();
 
                 // DOM Elements
                 this.video = document.getElementById('video-player');
-                this.scanVideo = document.getElementById('scan-video');
                 this.staticEl = document.getElementById('static');
                 this.channelDisplay = document.getElementById('channel-display');
                 this.channelInfo = document.getElementById('channel-info');
@@ -821,6 +821,17 @@
                     localStorage.setItem('tv_failed', JSON.stringify([...this.failedChannels]));
                     localStorage.setItem('tv_working', JSON.stringify([...this.workingChannels]));
                 } catch(e) {}
+                this.rebuildWorkingList();
+            }
+
+            rebuildWorkingList() {
+                this.workingList = [];
+                for (let i = 0; i < this.channels.length; i++) {
+                    const ch = this.channels[i];
+                    if (ch && this.workingChannels.has(ch.name + ch.url)) {
+                        this.workingList.push(i);
+                    }
+                }
             }
 
             updateStatusDisplay() {
@@ -830,6 +841,7 @@
 
             async init() {
                 await this.loadPlaylist();
+                this.rebuildWorkingList();
                 this.buildCountryIndex();
                 this.setupLetterButtons();
                 this.setupEventListeners();
@@ -844,22 +856,19 @@
                     this.powerLed.classList.add('on');
                     this.remotePower.classList.add('on');
 
-                    // Try to find a random working channel
-                    const workingIndices = [];
-                    for (let i = 0; i < this.channels.length; i++) {
-                        if (!this.isChannelFailed(i)) {
-                            workingIndices.push(i);
-                        }
-                    }
-
-                    if (workingIndices.length > 0) {
-                        this.currentChannel = workingIndices[Math.floor(Math.random() * workingIndices.length)];
+                    // Use working list if available
+                    if (this.workingList.length > 0) {
+                        this.workingListIndex = Math.floor(Math.random() * this.workingList.length);
+                        this.currentChannel = this.workingList[this.workingListIndex];
                     } else {
                         this.currentChannel = Math.floor(Math.random() * this.channels.length);
                     }
 
                     this.playChannel(this.currentChannel);
-                    this.updateRemoteDisplay(`${this.channels.length} CHANNELS`);
+                    const msg = this.workingList.length > 0
+                        ? `${this.workingList.length} WORKING`
+                        : `${this.channels.length} CHANNELS`;
+                    this.updateRemoteDisplay(msg);
                 }
             }
 
@@ -923,90 +932,111 @@
                 this.scanBtn.classList.add('scanning');
                 this.scanBtn.textContent = 'STOP';
                 this.scanIndex = 0;
-                this.setupScanVideo();
-                this.scanNextChannel();
+                this.initScanWorkers();
+                this.launchScanWorkers();
             }
 
             stopScan() {
                 this.isScanning = false;
                 this.scanBtn.classList.remove('scanning');
                 this.scanBtn.textContent = 'SCAN';
-                clearTimeout(this.scanTimeout);
-                if (this.scanHls) {
-                    this.scanHls.destroy();
-                    this.scanHls = null;
+                // Clean up all workers
+                this.scanWorkers.forEach(w => {
+                    clearTimeout(w.timeout);
+                    if (w.hls) w.hls.destroy();
+                    w.video.src = '';
+                });
+                this.scanWorkers = [];
+            }
+
+            initScanWorkers() {
+                // Create parallel scan workers
+                this.scanWorkers = [];
+                for (let i = 0; i < this.numScanWorkers; i++) {
+                    const video = document.createElement('video');
+                    video.style.display = 'none';
+                    video.muted = true;
+                    document.body.appendChild(video);
+                    this.scanWorkers.push({ video, hls: null, timeout: null, index: -1 });
                 }
-                this.scanVideo.src = '';
             }
 
-            setupScanVideo() {
-                // Set up events for the background scan video
-                this.scanVideo.addEventListener('playing', () => this.onScanSuccess(), { once: false });
-                this.scanVideo.addEventListener('error', () => this.onScanFail(), { once: false });
+            launchScanWorkers() {
+                // Launch all workers
+                this.scanWorkers.forEach(worker => this.scanWithWorker(worker));
             }
 
-            scanNextChannel() {
-                if (!this.isScanning) return;
-
+            getNextScanIndex() {
                 // Find next untested channel
-                let found = false;
-                for (let i = this.scanIndex; i < this.channels.length; i++) {
-                    const ch = this.channels[i];
+                while (this.scanIndex < this.channels.length) {
+                    const ch = this.channels[this.scanIndex];
                     const key = ch.name + ch.url;
                     if (!this.workingChannels.has(key) && !this.failedChannels.has(key)) {
-                        this.scanIndex = i;
-                        found = true;
-                        break;
+                        return this.scanIndex++;
                     }
+                    this.scanIndex++;
                 }
+                return -1; // No more to scan
+            }
 
-                if (!found) {
-                    this.updateRemoteDisplay('SCAN COMPLETE');
-                    this.stopScan();
+            scanWithWorker(worker) {
+                if (!this.isScanning) return;
+
+                const index = this.getNextScanIndex();
+                if (index === -1) {
+                    // Check if all workers done
+                    const allDone = this.scanWorkers.every(w => w.index === -1);
+                    if (allDone) {
+                        this.updateRemoteDisplay('SCAN COMPLETE');
+                        this.stopScan();
+                    }
                     return;
                 }
 
-                this.updateRemoteDisplay(`SCAN ${this.scanIndex + 1}/${this.channels.length}`);
-                this.testChannel(this.scanIndex);
-            }
-
-            testChannel(index) {
+                worker.index = index;
                 const channel = this.channels[index];
-                if (!channel) return;
+                this.updateRemoteDisplay(`SCAN ${index + 1}/${this.channels.length}`);
 
-                clearTimeout(this.scanTimeout);
-
-                if (this.scanHls) {
-                    this.scanHls.destroy();
-                    this.scanHls = null;
+                // Clean up previous
+                clearTimeout(worker.timeout);
+                if (worker.hls) {
+                    worker.hls.destroy();
+                    worker.hls = null;
                 }
 
-                // Timeout for this channel test
-                this.scanTimeout = setTimeout(() => this.onScanFail(), 8000);
+                // 4 second timeout for faster scanning
+                worker.timeout = setTimeout(() => this.onWorkerFail(worker), 4000);
 
                 const url = channel.url;
 
+                // Set up success handler
+                const onPlaying = () => {
+                    worker.video.removeEventListener('playing', onPlaying);
+                    this.onWorkerSuccess(worker);
+                };
+                worker.video.addEventListener('playing', onPlaying);
+
                 if (url.includes('.m3u8') && Hls.isSupported()) {
-                    this.scanHls = new Hls({ enableWorker: true });
-                    this.scanHls.loadSource(url);
-                    this.scanHls.attachMedia(this.scanVideo);
-                    this.scanHls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        this.scanVideo.play().catch(() => this.onScanFail());
+                    worker.hls = new Hls({ enableWorker: false }); // Disable worker for speed
+                    worker.hls.loadSource(url);
+                    worker.hls.attachMedia(worker.video);
+                    worker.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        worker.video.play().catch(() => this.onWorkerFail(worker));
                     });
-                    this.scanHls.on(Hls.Events.ERROR, (e, data) => {
-                        if (data.fatal) this.onScanFail();
+                    worker.hls.on(Hls.Events.ERROR, (e, data) => {
+                        if (data.fatal) this.onWorkerFail(worker);
                     });
                 } else {
-                    this.scanVideo.src = url;
-                    this.scanVideo.play().catch(() => this.onScanFail());
+                    worker.video.src = url;
+                    worker.video.play().catch(() => this.onWorkerFail(worker));
                 }
             }
 
-            onScanSuccess() {
-                if (!this.isScanning) return;
-                clearTimeout(this.scanTimeout);
+            onWorkerSuccess(worker) {
+                if (!this.isScanning || worker.index === -1) return;
+                clearTimeout(worker.timeout);
 
-                const ch = this.channels[this.scanIndex];
+                const ch = this.channels[worker.index];
                 if (ch) {
                     const key = ch.name + ch.url;
                     this.workingChannels.add(key);
@@ -1015,15 +1045,16 @@
                     this.updateStatusDisplay();
                 }
 
-                this.scanIndex++;
-                setTimeout(() => this.scanNextChannel(), 500);
+                worker.index = -1;
+                // Immediately scan next
+                this.scanWithWorker(worker);
             }
 
-            onScanFail() {
-                if (!this.isScanning) return;
-                clearTimeout(this.scanTimeout);
+            onWorkerFail(worker) {
+                if (!this.isScanning || worker.index === -1) return;
+                clearTimeout(worker.timeout);
 
-                const ch = this.channels[this.scanIndex];
+                const ch = this.channels[worker.index];
                 if (ch) {
                     const key = ch.name + ch.url;
                     this.failedChannels.add(key);
@@ -1032,8 +1063,9 @@
                     this.updateStatusDisplay();
                 }
 
-                this.scanIndex++;
-                this.scanNextChannel();
+                worker.index = -1;
+                // Immediately scan next
+                this.scanWithWorker(worker);
             }
 
             jumpToLetter(letter) {
@@ -1280,12 +1312,13 @@
             nextChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
 
-                // Skip failed channels
-                let attempts = 0;
-                do {
+                // Use working list if available
+                if (this.workingList.length > 0) {
+                    this.workingListIndex = (this.workingListIndex + 1) % this.workingList.length;
+                    this.currentChannel = this.workingList[this.workingListIndex];
+                } else {
                     this.currentChannel = (this.currentChannel + 1) % this.channels.length;
-                    attempts++;
-                } while (this.isChannelFailed(this.currentChannel) && attempts < this.channels.length);
+                }
 
                 this.playChannel(this.currentChannel);
                 this.animateChannelKnob(1);
@@ -1294,12 +1327,13 @@
             prevChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
 
-                // Skip failed channels
-                let attempts = 0;
-                do {
+                // Use working list if available
+                if (this.workingList.length > 0) {
+                    this.workingListIndex = (this.workingListIndex - 1 + this.workingList.length) % this.workingList.length;
+                    this.currentChannel = this.workingList[this.workingListIndex];
+                } else {
                     this.currentChannel = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
-                    attempts++;
-                } while (this.isChannelFailed(this.currentChannel) && attempts < this.channels.length);
+                }
 
                 this.playChannel(this.currentChannel);
                 this.animateChannelKnob(-1);
