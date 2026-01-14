@@ -1,0 +1,25 @@
+{
+  "name": "Classic Vintage TV",
+  "short_name": "Vintage TV",
+  "description": "A whimsical vintage TV app for watching live IPTV channels from around the world",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1a1a2e",
+  "theme_color": "#8B4513",
+  "categories": ["entertainment", "video"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
