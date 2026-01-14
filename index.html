@@ -836,6 +836,31 @@
                 this.setupRemoteListeners();
                 this.updateVolumeKnob();
                 this.updateStatusDisplay();
+
+                // Auto power on and play a random working channel
+                if (this.channels.length > 0) {
+                    this.isPoweredOn = true;
+                    this.powerBtn.classList.add('on');
+                    this.powerLed.classList.add('on');
+                    this.remotePower.classList.add('on');
+
+                    // Try to find a random working channel
+                    const workingIndices = [];
+                    for (let i = 0; i < this.channels.length; i++) {
+                        if (!this.isChannelFailed(i)) {
+                            workingIndices.push(i);
+                        }
+                    }
+
+                    if (workingIndices.length > 0) {
+                        this.currentChannel = workingIndices[Math.floor(Math.random() * workingIndices.length)];
+                    } else {
+                        this.currentChannel = Math.floor(Math.random() * this.channels.length);
+                    }
+
+                    this.playChannel(this.currentChannel);
+                    this.updateRemoteDisplay(`${this.channels.length} CHANNELS`);
+                }
             }
 
             buildCountryIndex() {
