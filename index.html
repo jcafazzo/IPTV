@@ -684,6 +684,249 @@
 
         .scan-status .working { color: #4ade80; }
         .scan-status .failed { color: #ff6b6b; }
+
+        /* Chunky MAP button on TV */
+        .map-btn-tv {
+            position: absolute;
+            bottom: 45px;
+            right: 25px;
+            width: 80px;
+            height: 35px;
+            background: linear-gradient(180deg, #c41e3a 0%, #8b0000 50%, #5c0000 100%);
+            border: 3px solid #ff6b6b;
+            border-radius: 8px;
+            color: #ffd700;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow:
+                0 4px 0 #3d0000,
+                0 6px 10px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.2);
+            transition: all 0.1s;
+            text-shadow: 0 0 5px #ffd700;
+        }
+
+        .map-btn-tv:hover {
+            background: linear-gradient(180deg, #d42a4a 0%, #9b1010 50%, #6c1010 100%);
+            text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+        }
+
+        .map-btn-tv:active {
+            transform: translateY(3px);
+            box-shadow:
+                0 1px 0 #3d0000,
+                0 2px 5px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.2);
+        }
+
+        .map-btn-tv::before {
+            content: '📺';
+            margin-right: 5px;
+        }
+
+        /* Remote MAP button */
+        .remote-btn.map {
+            background: linear-gradient(180deg, #4a2a6a 0%, #2a1a4a 100%);
+            color: #da70d6;
+            flex: 1;
+        }
+
+        .remote-btn.map:hover {
+            background: linear-gradient(180deg, #5a3a7a 0%, #3a2a5a 100%);
+            color: #fff;
+        }
+
+        /* World Map Overlay */
+        .map-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            overflow: auto;
+        }
+
+        .map-overlay.active {
+            display: flex;
+            flex-direction: column;
+            animation: mapFadeIn 0.3s ease-out;
+        }
+
+        @keyframes mapFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .map-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
+            border-bottom: 3px solid #ffd700;
+        }
+
+        .map-title {
+            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700, 0 0 20px #ff6b00;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+
+        .map-subtitle {
+            color: #4ade80;
+            font-size: 14px;
+        }
+
+        .map-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(180deg, #c41e3a 0%, #8b0000 100%);
+            border: 3px solid #ff6b6b;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(196, 30, 58, 0.5);
+            transition: all 0.2s;
+        }
+
+        .map-close:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 20px rgba(196, 30, 58, 0.8);
+        }
+
+        .map-container {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: flex-start;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .country-card {
+            background: linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%);
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            width: 140px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .country-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .country-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            border-color: #ffd700;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .country-card:hover::before {
+            opacity: 1;
+        }
+
+        .country-card.has-working {
+            border-color: #4ade80;
+        }
+
+        .country-card.has-working:hover {
+            border-color: #4ade80;
+            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.4);
+        }
+
+        .country-tv-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+            display: block;
+            animation: tvBounce 2s ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes tvBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .country-card.has-working .country-tv-icon {
+            filter: drop-shadow(0 0 10px #4ade80);
+        }
+
+        .country-name {
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .country-count {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .country-count .working-badge {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .country-count .total-badge {
+            color: #666;
+        }
+
+        .map-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 15px;
+            background: #0a0a0f;
+            border-top: 2px solid #333;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.working { background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+        .legend-dot.scanning { background: #6b9fff; box-shadow: 0 0 10px #6b9fff; }
+        .legend-dot.unknown { background: #666; }
     </style>
 </head>
 <body>
@@ -734,6 +977,7 @@
                 </div>
 
                 <div class="brand">CLASSIC TV</div>
+                <button class="map-btn-tv" id="map-btn-tv" title="World Channel Map">MAP</button>
             </div>
 
             <div class="tv-legs">
@@ -758,6 +1002,7 @@
             </div>
             <div class="control-row">
                 <button class="remote-btn scan" id="remote-scan">SCAN</button>
+                <button class="remote-btn map" id="remote-map">🗺️ MAP</button>
             </div>
             <div class="scan-status" id="scan-status">
                 <span class="working" id="working-count">0</span> working /
@@ -770,12 +1015,39 @@
         </div>
     </div>
 
+    <!-- World Map Overlay -->
+    <div class="map-overlay" id="map-overlay">
+        <div class="map-header">
+            <div class="map-title">🌍 WORLD TV MAP 📺</div>
+            <div class="map-subtitle" id="map-subtitle">Click a country to watch!</div>
+            <button class="map-close" id="map-close">✕</button>
+        </div>
+        <div class="map-container" id="map-container">
+            <!-- Country cards will be dynamically generated -->
+        </div>
+        <div class="map-legend">
+            <div class="legend-item">
+                <div class="legend-dot working"></div>
+                <span>Working Channels</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot scanning"></div>
+                <span>Still Scanning</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot unknown"></div>
+                <span>Not Yet Tested</span>
+            </div>
+        </div>
+    </div>
+
     <div class="instructions">
         <kbd>←</kbd> <kbd>→</kbd> Channel &nbsp;
         <kbd>↑</kbd> <kbd>↓</kbd> Volume &nbsp;
         <kbd>Space</kbd> Power &nbsp;
         <kbd>A-Z</kbd> Jump to country &nbsp;
         <kbd>F</kbd> Fullscreen &nbsp;
+        <kbd>M</kbd> Map &nbsp;
         <kbd>Esc</kbd> Exit
     </div>
 
@@ -832,6 +1104,15 @@
                 this.workingCountEl = document.getElementById('working-count');
                 this.failedCountEl = document.getElementById('failed-count');
 
+                // Map elements
+                this.mapOverlay = document.getElementById('map-overlay');
+                this.mapContainer = document.getElementById('map-container');
+                this.mapSubtitle = document.getElementById('map-subtitle');
+                this.mapBtnTv = document.getElementById('map-btn-tv');
+                this.mapBtnRemote = document.getElementById('remote-map');
+                this.mapClose = document.getElementById('map-close');
+                this.isMapOpen = false;
+
                 this.init();
             }
 
@@ -874,6 +1155,7 @@
                 this.setupLetterButtons();
                 this.setupEventListeners();
                 this.setupRemoteListeners();
+                this.setupMapListeners();
                 this.updateVolumeKnob();
                 this.updateStatusDisplay();
 
@@ -1230,8 +1512,22 @@
 
                 // Keyboard controls
                 document.addEventListener('keydown', (e) => {
-                    // Don't handle keys when in fullscreen and pressing escape (let browser handle it)
-                    if (e.key === 'Escape') return;
+                    // Escape closes map or exits fullscreen
+                    if (e.key === 'Escape') {
+                        if (this.isMapOpen) {
+                            this.closeMap();
+                            return;
+                        }
+                        return; // Let browser handle fullscreen exit
+                    }
+
+                    // M key for map
+                    if (e.key === 'm' || e.key === 'M') {
+                        if (!e.ctrlKey && !e.metaKey) {
+                            this.toggleMap();
+                            return;
+                        }
+                    }
 
                     // F key for fullscreen
                     if (e.key === 'f' || e.key === 'F') {
@@ -1241,8 +1537,8 @@
                         }
                     }
 
-                    // Letter keys A-Z for country jump (except F which is fullscreen)
-                    if (/^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() !== 'f') {
+                    // Letter keys A-Z for country jump (except F and M)
+                    if (/^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !['f','m'].includes(e.key.toLowerCase())) {
                         this.jumpToLetter(e.key.toUpperCase());
                         return;
                     }
@@ -1363,6 +1659,162 @@
                     this.autoSkipAttempts = 0;
                     this.updateRemoteDisplay('NO SIGNAL');
                 }
+            }
+
+            // Map functionality
+            setupMapListeners() {
+                this.mapBtnTv.addEventListener('click', () => this.toggleMap());
+                this.mapBtnRemote.addEventListener('click', () => this.toggleMap());
+                this.mapClose.addEventListener('click', () => this.closeMap());
+                this.mapOverlay.addEventListener('click', (e) => {
+                    if (e.target === this.mapOverlay) this.closeMap();
+                });
+            }
+
+            toggleMap() {
+                if (this.isMapOpen) {
+                    this.closeMap();
+                } else {
+                    this.openMap();
+                }
+            }
+
+            openMap() {
+                this.isMapOpen = true;
+                this.buildMapCards();
+                this.mapOverlay.classList.add('active');
+                this.updateRemoteDisplay('🗺️ MAP');
+            }
+
+            closeMap() {
+                this.isMapOpen = false;
+                this.mapOverlay.classList.remove('active');
+                if (this.isPoweredOn) {
+                    this.updateRemoteDisplay(`CH ${this.currentChannel + 1}`);
+                }
+            }
+
+            buildMapCards() {
+                this.mapContainer.innerHTML = '';
+
+                // Build a map of countries with their channel counts
+                const countryData = {};
+
+                this.channels.forEach((channel, index) => {
+                    const country = (channel.group || 'Unknown').trim();
+                    if (!countryData[country]) {
+                        countryData[country] = {
+                            name: country,
+                            total: 0,
+                            working: 0,
+                            failed: 0,
+                            firstIndex: index
+                        };
+                    }
+                    countryData[country].total++;
+
+                    const key = channel.name + channel.url;
+                    if (this.workingChannels.has(key)) {
+                        countryData[country].working++;
+                    } else if (this.failedChannels.has(key)) {
+                        countryData[country].failed++;
+                    }
+                });
+
+                // Sort by working count (descending), then alphabetically
+                const sortedCountries = Object.values(countryData).sort((a, b) => {
+                    if (b.working !== a.working) return b.working - a.working;
+                    return a.name.localeCompare(b.name);
+                });
+
+                // Update subtitle
+                const totalWorking = [...this.workingChannels].length;
+                const totalCountries = sortedCountries.filter(c => c.working > 0).length;
+                this.mapSubtitle.textContent = `${totalWorking} working channels across ${totalCountries} countries!`;
+
+                // Create country cards
+                sortedCountries.forEach((country, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'country-card';
+                    if (country.working > 0) {
+                        card.classList.add('has-working');
+                    }
+                    card.style.setProperty('--delay', `${(idx % 10) * 0.1}s`);
+
+                    const tvIcon = this.getCountryTvIcon(country.name);
+
+                    card.innerHTML = `
+                        <span class="country-tv-icon">${tvIcon}</span>
+                        <div class="country-name" title="${country.name}">${country.name}</div>
+                        <div class="country-count">
+                            <span class="working-badge">${country.working}</span> working /
+                            <span class="total-badge">${country.total}</span> total
+                        </div>
+                    `;
+
+                    card.addEventListener('click', () => {
+                        this.jumpToCountry(country.name, country.firstIndex);
+                    });
+
+                    this.mapContainer.appendChild(card);
+                });
+            }
+
+            getCountryTvIcon(country) {
+                // Fun TV icons with country flags where possible
+                const flagMap = {
+                    'USA': '🇺🇸📺', 'United States': '🇺🇸📺', 'UK': '🇬🇧📺', 'United Kingdom': '🇬🇧📺',
+                    'Canada': '🇨🇦📺', 'Germany': '🇩🇪📺', 'France': '🇫🇷📺', 'Spain': '🇪🇸📺',
+                    'Italy': '🇮🇹📺', 'Japan': '🇯🇵📺', 'China': '🇨🇳📺', 'Russia': '🇷🇺📺',
+                    'Brazil': '🇧🇷📺', 'Mexico': '🇲🇽📺', 'Australia': '🇦🇺📺', 'India': '🇮🇳📺',
+                    'Netherlands': '🇳🇱📺', 'Portugal': '🇵🇹📺', 'Poland': '🇵🇱📺', 'Sweden': '🇸🇪📺',
+                    'Turkey': '🇹🇷📺', 'Korea': '🇰🇷📺', 'South Korea': '🇰🇷📺', 'Argentina': '🇦🇷📺',
+                    'Chile': '🇨🇱📺', 'Colombia': '🇨🇴📺', 'Greece': '🇬🇷📺', 'Romania': '🇷🇴📺',
+                    'Belgium': '🇧🇪📺', 'Switzerland': '🇨🇭📺', 'Austria': '🇦🇹📺', 'Norway': '🇳🇴📺',
+                    'Denmark': '🇩🇰📺', 'Finland': '🇫🇮📺', 'Ireland': '🇮🇪📺', 'Israel': '🇮🇱📺',
+                    'Saudi Arabia': '🇸🇦📺', 'UAE': '🇦🇪📺', 'Egypt': '🇪🇬📺', 'South Africa': '🇿🇦📺',
+                    'Indonesia': '🇮🇩📺', 'Thailand': '🇹🇭📺', 'Vietnam': '🇻🇳📺', 'Philippines': '🇵🇭📺',
+                    'Malaysia': '🇲🇾📺', 'Singapore': '🇸🇬📺', 'New Zealand': '🇳🇿📺', 'Czech': '🇨🇿📺',
+                    'Hungary': '🇭🇺📺', 'Ukraine': '🇺🇦📺', 'Croatia': '🇭🇷📺', 'Serbia': '🇷🇸📺',
+                    'Bulgaria': '🇧🇬📺', 'Slovakia': '🇸🇰📺', 'Slovenia': '🇸🇮📺', 'Latvia': '🇱🇻📺',
+                    'Lithuania': '🇱🇹📺', 'Estonia': '🇪🇪📺', 'Iceland': '🇮🇸📺', 'Luxembourg': '🇱🇺📺',
+                    'Albania': '🇦🇱📺', 'Morocco': '🇲🇦📺', 'Tunisia': '🇹🇳📺', 'Algeria': '🇩🇿📺',
+                    'Pakistan': '🇵🇰📺', 'Bangladesh': '🇧🇩📺', 'Iran': '🇮🇷📺', 'Iraq': '🇮🇶📺',
+                    'Peru': '🇵🇪📺', 'Venezuela': '🇻🇪📺', 'Ecuador': '🇪🇨📺', 'Cuba': '🇨🇺📺'
+                };
+
+                // Check for exact match or partial match
+                for (const [key, icon] of Object.entries(flagMap)) {
+                    if (country.toLowerCase().includes(key.toLowerCase())) {
+                        return icon;
+                    }
+                }
+
+                // Default TV icon with globe
+                return '🌐📺';
+            }
+
+            jumpToCountry(countryName, fallbackIndex) {
+                // Find a working channel for this country
+                for (let i = 0; i < this.channels.length; i++) {
+                    const ch = this.channels[i];
+                    if (ch.group === countryName) {
+                        const key = ch.name + ch.url;
+                        if (this.workingChannels.has(key)) {
+                            this.currentChannel = i;
+                            this.closeMap();
+                            this.playChannel(i);
+                            this.updateRemoteDisplay(`→ ${countryName}`);
+                            return;
+                        }
+                    }
+                }
+
+                // No working channels found, use first channel for this country
+                this.currentChannel = fallbackIndex;
+                this.closeMap();
+                this.playChannel(fallbackIndex);
+                this.updateRemoteDisplay(`→ ${countryName}`);
             }
 
             togglePower() {
