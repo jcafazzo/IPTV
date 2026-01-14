@@ -518,6 +518,124 @@
             border-radius: 4px;
             margin: 0 3px;
         }
+
+        /* Cable Box Remote */
+        .remote-container {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 200;
+        }
+
+        .remote-wire {
+            position: absolute;
+            bottom: 100%;
+            left: 20px;
+            width: 4px;
+            height: 150px;
+            background: linear-gradient(90deg, #1a1a1a 0%, #333 50%, #1a1a1a 100%);
+            border-radius: 2px;
+            transform-origin: bottom center;
+            transform: rotate(-15deg);
+        }
+
+        .remote {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 2px solid #333;
+            width: 200px;
+        }
+
+        .remote-brand {
+            text-align: center;
+            color: #666;
+            font-size: 9px;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .remote-display {
+            background: #0a1a0a;
+            color: #33ff33;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 10px;
+            border: 1px solid #333;
+            text-shadow: 0 0 5px #33ff33;
+        }
+
+        .remote-section {
+            margin-bottom: 8px;
+        }
+
+        .remote-section-label {
+            color: #555;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .letter-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+        }
+
+        .remote-btn {
+            background: linear-gradient(180deg, #3a3a3a 0%, #252525 100%);
+            border: 1px solid #444;
+            border-radius: 3px;
+            color: #888;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 5px 2px;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-family: Arial, sans-serif;
+        }
+
+        .remote-btn:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #353535 100%);
+            color: #fff;
+        }
+
+        .remote-btn:active {
+            transform: scale(0.95);
+        }
+
+        .remote-btn.has-channels {
+            color: #4ade80;
+            border-color: #3a5a3a;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .remote-btn.power {
+            background: linear-gradient(180deg, #4a2a2a 0%, #2a1a1a 100%);
+            color: #ff6b6b;
+            flex: 1;
+        }
+
+        .remote-btn.power.on {
+            background: linear-gradient(180deg, #2a4a2a 0%, #1a2a1a 100%);
+            color: #4ade80;
+        }
+
+        .remote-btn.nav {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -577,10 +695,31 @@
         </div>
     </div>
 
+    <!-- Cable Box Remote -->
+    <div class="remote-container">
+        <div class="remote-wire"></div>
+        <div class="remote">
+            <div class="remote-brand">CABLE BOX</div>
+            <div class="remote-display" id="remote-display">POWER OFF</div>
+            <div class="control-row">
+                <button class="remote-btn power" id="remote-power">POWER</button>
+            </div>
+            <div class="control-row">
+                <button class="remote-btn nav" id="remote-ch-dn">CH-</button>
+                <button class="remote-btn nav" id="remote-ch-up">CH+</button>
+            </div>
+            <div class="remote-section">
+                <div class="remote-section-label">Jump to Country</div>
+                <div class="letter-grid" id="letter-grid"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="instructions">
-        <kbd>←</kbd> <kbd>→</kbd> Change Channel &nbsp;&nbsp;
-        <kbd>↑</kbd> <kbd>↓</kbd> Volume &nbsp;&nbsp;
-        <kbd>Space</kbd> Power
+        <kbd>←</kbd> <kbd>→</kbd> Channel &nbsp;
+        <kbd>↑</kbd> <kbd>↓</kbd> Volume &nbsp;
+        <kbd>Space</kbd> Power &nbsp;
+        <kbd>A-Z</kbd> Jump to country
     </div>
 
     <script>
@@ -594,6 +733,7 @@
                 this.hls = null;
                 this.channelDisplayTimeout = null;
                 this.infoDisplayTimeout = null;
+                this.countryIndex = {};
 
                 // DOM Elements
                 this.video = document.getElementById('video-player');
@@ -610,13 +750,82 @@
                 this.channelKnob = document.getElementById('channel-knob');
                 this.volumeKnob = document.getElementById('volume-knob');
 
+                // Remote elements
+                this.remoteDisplay = document.getElementById('remote-display');
+                this.remotePower = document.getElementById('remote-power');
+                this.letterGrid = document.getElementById('letter-grid');
+
                 this.init();
             }
 
             async init() {
                 await this.loadPlaylist();
+                this.buildCountryIndex();
+                this.setupLetterButtons();
                 this.setupEventListeners();
+                this.setupRemoteListeners();
                 this.updateVolumeKnob();
+            }
+
+            buildCountryIndex() {
+                this.countryIndex = {};
+                this.channels.forEach((channel, index) => {
+                    const country = (channel.group || '').trim();
+                    if (country) {
+                        const letter = country[0].toUpperCase();
+                        if (/[A-Z]/.test(letter)) {
+                            if (!this.countryIndex[letter]) {
+                                this.countryIndex[letter] = [];
+                            }
+                            this.countryIndex[letter].push({ index, country });
+                        }
+                    }
+                });
+            }
+
+            setupLetterButtons() {
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.className = 'remote-btn';
+                    btn.textContent = letter;
+                    btn.dataset.letter = letter;
+                    if (this.countryIndex[letter]?.length > 0) {
+                        btn.classList.add('has-channels');
+                        const countries = [...new Set(this.countryIndex[letter].map(c => c.country))];
+                        btn.title = countries.slice(0, 5).join(', ');
+                    }
+                    this.letterGrid.appendChild(btn);
+                });
+            }
+
+            setupRemoteListeners() {
+                this.remotePower.addEventListener('click', () => this.togglePower());
+                document.getElementById('remote-ch-up').addEventListener('click', () => this.nextChannel());
+                document.getElementById('remote-ch-dn').addEventListener('click', () => this.prevChannel());
+                this.letterGrid.addEventListener('click', (e) => {
+                    if (e.target.dataset.letter) {
+                        this.jumpToLetter(e.target.dataset.letter);
+                    }
+                });
+            }
+
+            jumpToLetter(letter) {
+                if (!this.isPoweredOn) {
+                    this.updateRemoteDisplay('POWER OFF');
+                    return;
+                }
+                const entries = this.countryIndex[letter];
+                if (!entries || entries.length === 0) {
+                    this.updateRemoteDisplay(`No "${letter}" countries`);
+                    return;
+                }
+                this.currentChannel = entries[0].index;
+                this.playChannel(this.currentChannel);
+                this.updateRemoteDisplay(`${letter} → ${this.channels[this.currentChannel].group}`);
+            }
+
+            updateRemoteDisplay(text) {
+                this.remoteDisplay.textContent = text;
             }
 
             async loadPlaylist() {
@@ -711,6 +920,11 @@
 
                 // Keyboard controls
                 document.addEventListener('keydown', (e) => {
+                    // Letter keys A-Z for country jump
+                    if (/^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+                        this.jumpToLetter(e.key.toUpperCase());
+                        return;
+                    }
                     switch(e.key) {
                         case 'ArrowRight':
                             this.nextChannel();
@@ -773,12 +987,14 @@
             powerOn() {
                 this.powerBtn.classList.add('on');
                 this.powerLed.classList.add('on');
+                this.remotePower.classList.add('on');
                 this.staticEl.classList.add('active');
+                this.updateRemoteDisplay('POWERING ON...');
 
-                // Small delay before playing
                 setTimeout(() => {
                     if (this.channels.length > 0) {
                         this.playChannel(this.currentChannel);
+                        this.updateRemoteDisplay(`${this.channels.length} CHANNELS`);
                     }
                 }, 500);
             }
@@ -786,11 +1002,13 @@
             powerOff() {
                 this.powerBtn.classList.remove('on');
                 this.powerLed.classList.remove('on');
+                this.remotePower.classList.remove('on');
                 this.staticEl.classList.remove('active');
                 this.loading.classList.remove('active');
                 this.errorMessage.classList.remove('active');
                 this.channelDisplay.classList.remove('visible');
                 this.channelInfo.classList.remove('visible');
+                this.updateRemoteDisplay('POWER OFF');
 
                 if (this.hls) {
                     this.hls.destroy();
