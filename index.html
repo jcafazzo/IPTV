@@ -867,98 +867,148 @@
 
         .map-container {
             flex: 1;
-            padding: 30px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-content: flex-start;
-            gap: 15px;
-            overflow-y: auto;
-        }
-
-        .country-card {
-            background: linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%);
-            border: 2px solid #333;
-            border-radius: 12px;
-            padding: 15px;
-            width: 140px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
             position: relative;
             overflow: hidden;
+            background:
+                radial-gradient(ellipse at 50% 50%, #1a3a5c 0%, #0a1a2e 100%);
         }
 
-        .country-card::before {
-            content: '';
+        .world-map {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+        }
+
+        .world-map svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .world-map svg path {
+            fill: #2a4a6a;
+            stroke: #4a6a8a;
+            stroke-width: 0.5;
+            transition: fill 0.3s;
+        }
+
+        .world-map svg path:hover {
+            fill: #3a5a7a;
+        }
+
+        /* TV Marker on map */
+        .map-marker {
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
         }
 
-        .country-card:hover {
-            transform: translateY(-5px) scale(1.05);
-            border-color: #ffd700;
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        .map-marker:hover {
+            z-index: 100;
+            transform: translate(-50%, -50%) scale(1.3);
         }
 
-        .country-card:hover::before {
-            opacity: 1;
-        }
-
-        .country-card.has-working {
-            border-color: #4ade80;
-        }
-
-        .country-card.has-working:hover {
-            border-color: #4ade80;
-            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.4);
-        }
-
-        .country-tv-icon {
-            font-size: 40px;
-            margin-bottom: 8px;
+        .marker-icon {
+            font-size: 24px;
             display: block;
-            animation: tvBounce 2s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            animation: markerPulse 2s ease-in-out infinite;
             animation-delay: var(--delay, 0s);
         }
 
-        @keyframes tvBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        @keyframes markerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
-        .country-card.has-working .country-tv-icon {
-            filter: drop-shadow(0 0 10px #4ade80);
+        .map-marker.has-working .marker-icon {
+            filter: drop-shadow(0 0 8px #4ade80) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
-        .country-name {
-            color: #fff;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .map-marker.no-working .marker-icon {
+            filter: grayscale(0.5) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            opacity: 0.6;
+        }
+
+        .marker-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #4ade80;
+            border-radius: 8px;
+            padding: 8px 12px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s;
+            margin-bottom: 5px;
         }
 
-        .country-count {
-            font-size: 10px;
-            color: #888;
+        .map-marker:hover .marker-tooltip {
+            opacity: 1;
         }
 
-        .country-count .working-badge {
-            color: #4ade80;
+        .marker-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #4ade80;
+        }
+
+        .tooltip-name {
+            color: #fff;
+            font-size: 14px;
             font-weight: bold;
+            margin-bottom: 4px;
         }
 
-        .country-count .total-badge {
-            color: #666;
+        .tooltip-count {
+            font-size: 11px;
+            color: #4ade80;
+        }
+
+        .tooltip-count .failed {
+            color: #ff6b6b;
+        }
+
+        /* Grid lines on map */
+        .map-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            background-image:
+                linear-gradient(to right, #4a6a8a 1px, transparent 1px),
+                linear-gradient(to bottom, #4a6a8a 1px, transparent 1px);
+            background-size: 10% 10%;
+        }
+
+        /* Scan line effect */
+        .map-scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #4ade80, transparent);
+            opacity: 0.5;
+            animation: scanline 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanline {
+            0% { top: 0; }
+            100% { top: 100%; }
         }
 
         .map-legend {
@@ -1084,7 +1134,11 @@
             <button class="map-close" id="map-close">✕</button>
         </div>
         <div class="map-container" id="map-container">
-            <!-- Country cards will be dynamically generated -->
+            <div class="world-map" id="world-map">
+                <div class="map-grid"></div>
+                <div class="map-scanline"></div>
+                <!-- Markers will be dynamically generated -->
+            </div>
         </div>
         <div class="map-legend">
             <div class="legend-item">
@@ -1781,11 +1835,56 @@
             }
 
             buildMapCards() {
-                this.mapContainer.innerHTML = '';
+                const worldMap = document.getElementById('world-map');
+                // Remove old markers
+                worldMap.querySelectorAll('.map-marker').forEach(m => m.remove());
 
-                // Build a map of countries with their channel counts
+                // Country coordinates (percentage of map: x=left%, y=top%)
+                const countryCoords = {
+                    'USA': { x: 18, y: 38 }, 'United States': { x: 18, y: 38 },
+                    'Canada': { x: 18, y: 28 }, 'Mexico': { x: 15, y: 48 },
+                    'Brazil': { x: 32, y: 65 }, 'Argentina': { x: 28, y: 78 },
+                    'Chile': { x: 25, y: 75 }, 'Colombia': { x: 24, y: 52 },
+                    'Peru': { x: 23, y: 60 }, 'Venezuela': { x: 27, y: 50 },
+                    'Ecuador': { x: 22, y: 55 }, 'Cuba': { x: 22, y: 46 },
+                    'UK': { x: 47, y: 30 }, 'United Kingdom': { x: 47, y: 30 },
+                    'Germany': { x: 51, y: 32 }, 'France': { x: 49, y: 35 },
+                    'Spain': { x: 46, y: 40 }, 'Italy': { x: 52, y: 38 },
+                    'Netherlands': { x: 50, y: 30 }, 'Belgium': { x: 49, y: 32 },
+                    'Portugal': { x: 44, y: 40 }, 'Poland': { x: 54, y: 32 },
+                    'Sweden': { x: 53, y: 24 }, 'Norway': { x: 51, y: 22 },
+                    'Denmark': { x: 51, y: 28 }, 'Finland': { x: 56, y: 22 },
+                    'Austria': { x: 53, y: 35 }, 'Switzerland': { x: 50, y: 35 },
+                    'Greece': { x: 55, y: 42 }, 'Turkey': { x: 58, y: 40 },
+                    'Russia': { x: 70, y: 28 }, 'Ukraine': { x: 58, y: 33 },
+                    'Romania': { x: 56, y: 36 }, 'Bulgaria': { x: 56, y: 38 },
+                    'Hungary': { x: 54, y: 35 }, 'Czech': { x: 53, y: 33 },
+                    'Slovakia': { x: 54, y: 34 }, 'Croatia': { x: 53, y: 37 },
+                    'Serbia': { x: 55, y: 37 }, 'Slovenia': { x: 52, y: 36 },
+                    'Ireland': { x: 44, y: 30 }, 'Iceland': { x: 42, y: 20 },
+                    'Albania': { x: 54, y: 40 }, 'Latvia': { x: 56, y: 28 },
+                    'Lithuania': { x: 55, y: 28 }, 'Estonia': { x: 56, y: 26 },
+                    'Luxembourg': { x: 49, y: 33 },
+                    'China': { x: 78, y: 42 }, 'Japan': { x: 87, y: 40 },
+                    'Korea': { x: 84, y: 40 }, 'South Korea': { x: 84, y: 40 },
+                    'India': { x: 70, y: 48 }, 'Pakistan': { x: 67, y: 44 },
+                    'Bangladesh': { x: 73, y: 48 }, 'Thailand': { x: 77, y: 52 },
+                    'Vietnam': { x: 79, y: 52 }, 'Indonesia': { x: 80, y: 60 },
+                    'Malaysia': { x: 78, y: 56 }, 'Singapore': { x: 78, y: 58 },
+                    'Philippines': { x: 83, y: 52 }, 'Taiwan': { x: 83, y: 46 },
+                    'Australia': { x: 85, y: 72 }, 'New Zealand': { x: 92, y: 78 },
+                    'Egypt': { x: 57, y: 46 }, 'South Africa': { x: 56, y: 74 },
+                    'Morocco': { x: 45, y: 44 }, 'Algeria': { x: 49, y: 44 },
+                    'Tunisia': { x: 51, y: 42 }, 'Nigeria': { x: 51, y: 52 },
+                    'Kenya': { x: 60, y: 58 }, 'Ethiopia': { x: 60, y: 52 },
+                    'Israel': { x: 58, y: 44 }, 'Saudi Arabia': { x: 62, y: 48 },
+                    'UAE': { x: 65, y: 48 }, 'Iran': { x: 64, y: 44 },
+                    'Iraq': { x: 62, y: 44 }, 'Afghanistan': { x: 68, y: 44 },
+                    'International': { x: 50, y: 50 }, 'Unknown': { x: 50, y: 85 }
+                };
+
+                // Build country data
                 const countryData = {};
-
                 this.channels.forEach((channel, index) => {
                     const country = (channel.group || 'Unknown').trim();
                     if (!countryData[country]) {
@@ -1798,7 +1897,6 @@
                         };
                     }
                     countryData[country].total++;
-
                     const key = channel.name + channel.url;
                     if (this.workingChannels.has(key)) {
                         countryData[country].working++;
@@ -1807,77 +1905,90 @@
                     }
                 });
 
-                // Sort by working count (descending), then alphabetically
-                const sortedCountries = Object.values(countryData).sort((a, b) => {
-                    if (b.working !== a.working) return b.working - a.working;
-                    return a.name.localeCompare(b.name);
-                });
-
                 // Update subtitle
                 const totalWorking = [...this.workingChannels].length;
-                const totalCountries = sortedCountries.filter(c => c.working > 0).length;
-                this.mapSubtitle.textContent = `${totalWorking} working channels across ${totalCountries} countries!`;
+                const countriesWithWorking = Object.values(countryData).filter(c => c.working > 0).length;
+                this.mapSubtitle.textContent = `📡 ${totalWorking} working channels across ${countriesWithWorking} countries!`;
 
-                // Create country cards
-                sortedCountries.forEach((country, idx) => {
-                    const card = document.createElement('div');
-                    card.className = 'country-card';
-                    if (country.working > 0) {
-                        card.classList.add('has-working');
+                // Create markers
+                let idx = 0;
+                for (const [name, data] of Object.entries(countryData)) {
+                    const coords = countryCoords[name] || this.guessCoordinates(name);
+                    if (!coords) continue;
+
+                    const marker = document.createElement('div');
+                    marker.className = 'map-marker';
+                    if (data.working > 0) {
+                        marker.classList.add('has-working');
+                    } else {
+                        marker.classList.add('no-working');
                     }
-                    card.style.setProperty('--delay', `${(idx % 10) * 0.1}s`);
+                    marker.style.left = `${coords.x}%`;
+                    marker.style.top = `${coords.y}%`;
+                    marker.style.setProperty('--delay', `${(idx % 20) * 0.1}s`);
 
-                    const tvIcon = this.getCountryTvIcon(country.name);
+                    const flag = this.getCountryFlag(name);
 
-                    card.innerHTML = `
-                        <span class="country-tv-icon">${tvIcon}</span>
-                        <div class="country-name" title="${country.name}">${country.name}</div>
-                        <div class="country-count">
-                            <span class="working-badge">${country.working}</span> working /
-                            <span class="total-badge">${country.total}</span> total
+                    marker.innerHTML = `
+                        <span class="marker-icon">${flag}📺</span>
+                        <div class="marker-tooltip">
+                            <div class="tooltip-name">${name}</div>
+                            <div class="tooltip-count">
+                                ✅ ${data.working} working
+                                ${data.failed > 0 ? `<span class="failed">❌ ${data.failed} failed</span>` : ''}
+                            </div>
                         </div>
                     `;
 
-                    card.addEventListener('click', () => {
-                        this.jumpToCountry(country.name, country.firstIndex);
+                    marker.addEventListener('click', () => {
+                        this.jumpToCountry(name, data.firstIndex);
                     });
 
-                    this.mapContainer.appendChild(card);
-                });
+                    worldMap.appendChild(marker);
+                    idx++;
+                }
             }
 
-            getCountryTvIcon(country) {
-                // Fun TV icons with country flags where possible
+            guessCoordinates(country) {
+                // Try to guess based on partial matches
+                const countryLower = country.toLowerCase();
+                if (countryLower.includes('latin') || countryLower.includes('latino')) return { x: 20, y: 55 };
+                if (countryLower.includes('arab') || countryLower.includes('middle east')) return { x: 60, y: 45 };
+                if (countryLower.includes('africa')) return { x: 55, y: 55 };
+                if (countryLower.includes('asia')) return { x: 75, y: 45 };
+                if (countryLower.includes('europe')) return { x: 52, y: 35 };
+                if (countryLower.includes('america')) return { x: 20, y: 45 };
+                // Default position for unknown
+                return { x: 50 + Math.random() * 10 - 5, y: 80 + Math.random() * 10 };
+            }
+
+            getCountryFlag(country) {
                 const flagMap = {
-                    'USA': '🇺🇸📺', 'United States': '🇺🇸📺', 'UK': '🇬🇧📺', 'United Kingdom': '🇬🇧📺',
-                    'Canada': '🇨🇦📺', 'Germany': '🇩🇪📺', 'France': '🇫🇷📺', 'Spain': '🇪🇸📺',
-                    'Italy': '🇮🇹📺', 'Japan': '🇯🇵📺', 'China': '🇨🇳📺', 'Russia': '🇷🇺📺',
-                    'Brazil': '🇧🇷📺', 'Mexico': '🇲🇽📺', 'Australia': '🇦🇺📺', 'India': '🇮🇳📺',
-                    'Netherlands': '🇳🇱📺', 'Portugal': '🇵🇹📺', 'Poland': '🇵🇱📺', 'Sweden': '🇸🇪📺',
-                    'Turkey': '🇹🇷📺', 'Korea': '🇰🇷📺', 'South Korea': '🇰🇷📺', 'Argentina': '🇦🇷📺',
-                    'Chile': '🇨🇱📺', 'Colombia': '🇨🇴📺', 'Greece': '🇬🇷📺', 'Romania': '🇷🇴📺',
-                    'Belgium': '🇧🇪📺', 'Switzerland': '🇨🇭📺', 'Austria': '🇦🇹📺', 'Norway': '🇳🇴📺',
-                    'Denmark': '🇩🇰📺', 'Finland': '🇫🇮📺', 'Ireland': '🇮🇪📺', 'Israel': '🇮🇱📺',
-                    'Saudi Arabia': '🇸🇦📺', 'UAE': '🇦🇪📺', 'Egypt': '🇪🇬📺', 'South Africa': '🇿🇦📺',
-                    'Indonesia': '🇮🇩📺', 'Thailand': '🇹🇭📺', 'Vietnam': '🇻🇳📺', 'Philippines': '🇵🇭📺',
-                    'Malaysia': '🇲🇾📺', 'Singapore': '🇸🇬📺', 'New Zealand': '🇳🇿📺', 'Czech': '🇨🇿📺',
-                    'Hungary': '🇭🇺📺', 'Ukraine': '🇺🇦📺', 'Croatia': '🇭🇷📺', 'Serbia': '🇷🇸📺',
-                    'Bulgaria': '🇧🇬📺', 'Slovakia': '🇸🇰📺', 'Slovenia': '🇸🇮📺', 'Latvia': '🇱🇻📺',
-                    'Lithuania': '🇱🇹📺', 'Estonia': '🇪🇪📺', 'Iceland': '🇮🇸📺', 'Luxembourg': '🇱🇺📺',
-                    'Albania': '🇦🇱📺', 'Morocco': '🇲🇦📺', 'Tunisia': '🇹🇳📺', 'Algeria': '🇩🇿📺',
-                    'Pakistan': '🇵🇰📺', 'Bangladesh': '🇧🇩📺', 'Iran': '🇮🇷📺', 'Iraq': '🇮🇶📺',
-                    'Peru': '🇵🇪📺', 'Venezuela': '🇻🇪📺', 'Ecuador': '🇪🇨📺', 'Cuba': '🇨🇺📺'
+                    'USA': '🇺🇸', 'United States': '🇺🇸', 'UK': '🇬🇧', 'United Kingdom': '🇬🇧',
+                    'Canada': '🇨🇦', 'Germany': '🇩🇪', 'France': '🇫🇷', 'Spain': '🇪🇸',
+                    'Italy': '🇮🇹', 'Japan': '🇯🇵', 'China': '🇨🇳', 'Russia': '🇷🇺',
+                    'Brazil': '🇧🇷', 'Mexico': '🇲🇽', 'Australia': '🇦🇺', 'India': '🇮🇳',
+                    'Netherlands': '🇳🇱', 'Portugal': '🇵🇹', 'Poland': '🇵🇱', 'Sweden': '🇸🇪',
+                    'Turkey': '🇹🇷', 'Korea': '🇰🇷', 'South Korea': '🇰🇷', 'Argentina': '🇦🇷',
+                    'Chile': '🇨🇱', 'Colombia': '🇨🇴', 'Greece': '🇬🇷', 'Romania': '🇷🇴',
+                    'Belgium': '🇧🇪', 'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Norway': '🇳🇴',
+                    'Denmark': '🇩🇰', 'Finland': '🇫🇮', 'Ireland': '🇮🇪', 'Israel': '🇮🇱',
+                    'Saudi Arabia': '🇸🇦', 'UAE': '🇦🇪', 'Egypt': '🇪🇬', 'South Africa': '🇿🇦',
+                    'Indonesia': '🇮🇩', 'Thailand': '🇹🇭', 'Vietnam': '🇻🇳', 'Philippines': '🇵🇭',
+                    'Malaysia': '🇲🇾', 'Singapore': '🇸🇬', 'New Zealand': '🇳🇿', 'Czech': '🇨🇿',
+                    'Hungary': '🇭🇺', 'Ukraine': '🇺🇦', 'Croatia': '🇭🇷', 'Serbia': '🇷🇸',
+                    'Bulgaria': '🇧🇬', 'Slovakia': '🇸🇰', 'Slovenia': '🇸🇮', 'Latvia': '🇱🇻',
+                    'Lithuania': '🇱🇹', 'Estonia': '🇪🇪', 'Iceland': '🇮🇸', 'Luxembourg': '🇱🇺',
+                    'Albania': '🇦🇱', 'Morocco': '🇲🇦', 'Tunisia': '🇹🇳', 'Algeria': '🇩🇿',
+                    'Pakistan': '🇵🇰', 'Bangladesh': '🇧🇩', 'Iran': '🇮🇷', 'Iraq': '🇮🇶',
+                    'Peru': '🇵🇪', 'Venezuela': '🇻🇪', 'Ecuador': '🇪🇨', 'Cuba': '🇨🇺',
+                    'Taiwan': '🇹🇼', 'Nigeria': '🇳🇬', 'Kenya': '🇰🇪', 'Ethiopia': '🇪🇹',
+                    'Afghanistan': '🇦🇫', 'International': '🌍', 'Unknown': '❓'
                 };
-
-                // Check for exact match or partial match
-                for (const [key, icon] of Object.entries(flagMap)) {
-                    if (country.toLowerCase().includes(key.toLowerCase())) {
-                        return icon;
-                    }
+                for (const [key, flag] of Object.entries(flagMap)) {
+                    if (country.toLowerCase().includes(key.toLowerCase())) return flag;
                 }
-
-                // Default TV icon with globe
-                return '🌐📺';
+                return '🌐';
             }
 
             jumpToCountry(countryName, fallbackIndex) {
