@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic TV</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        .room {
+            perspective: 1000px;
+        }
+
+        .tv-container {
+            position: relative;
+            transform: rotateX(2deg);
+        }
+
+        /* Main TV Cabinet */
+        .tv {
+            position: relative;
+            width: 700px;
+            height: 580px;
+            background: linear-gradient(145deg, #8B4513 0%, #654321 50%, #4a3728 100%);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.5),
+                inset 0 2px 4px rgba(255,255,255,0.1),
+                inset 0 -2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Wood grain texture */
+        .tv::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 25px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+            );
+            pointer-events: none;
+        }
+
+        /* Screen bezel */
+        .screen-container {
+            position: relative;
+            width: 480px;
+            height: 360px;
+            background: #1a1a1a;
+            border-radius: 20px 20px 20px 20px;
+            padding: 15px;
+            margin-left: 20px;
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.8),
+                0 0 0 8px #2d2d2d,
+                0 0 0 12px #1a1a1a;
+        }
+
+        /* CRT screen effect */
+        .screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 0 100px rgba(0,50,0,0.2);
+        }
+
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0,0,0,0.15),
+                    rgba(0,0,0,0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .screen::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 80%);
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        #video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Static noise effect */
+        .static {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            z-index: 5;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .static.active {
+            opacity: 0.4;
+            animation: staticFlicker 0.1s infinite;
+        }
+
+        @keyframes staticFlicker {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.2; }
+        }
+
+        /* Channel display */
+        .channel-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #00ff00;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+            z-index: 20;
+            text-shadow: 0 0 10px #00ff00;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .channel-display.visible {
+            opacity: 1;
+        }
+
+        /* Control panel */
+        .control-panel {
+            position: absolute;
+            right: 25px;
+            top: 50px;
+            width: 120px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        /* Speaker grille */
+        .speaker {
+            width: 100px;
+            height: 100px;
+            background: #2d2d2d;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .speaker::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: repeating-linear-gradient(
+                0deg,
+                #1a1a1a,
+                #1a1a1a 3px,
+                #2d2d2d 3px,
+                #2d2d2d 6px
+            );
+            border-radius: 5px;
+        }
+
+        /* Knob styles */
+        .knob-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .knob-label {
+            color: #d4af37;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .knob {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #4a4a4a, #2d2d2d);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(255,255,255,0.1);
+            transition: transform 0.1s;
+        }
+
+        .knob:active {
+            transform: scale(0.95);
+        }
+
+        .knob::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 25px;
+            background: linear-gradient(90deg, #666, #888, #666);
+            transform-origin: center bottom;
+            transform: translate(-50%, -100%);
+            border-radius: 4px;
+        }
+
+        .knob::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #555 0%, #333 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Channel knob specific */
+        #channel-knob::before {
+            transform: translate(-50%, -100%) rotate(var(--rotation, 0deg));
+        }
+
+        /* Volume knob specific */
+        #volume-knob::before {
+            transform: translate(-50%, -100%) rotate(var(--rotation, -90deg));
+        }
+
+        /* Power button */
+        .power-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #333, #1a1a1a);
+            border-radius: 50%;
+            border: 3px solid #444;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+        }
+
+        .power-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            border: 3px solid #666;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .power-btn::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            width: 3px;
+            height: 10px;
+            background: #666;
+            transform: translateX(-50%);
+        }
+
+        .power-btn.on::before,
+        .power-btn.on::after {
+            border-color: #00ff00;
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .power-btn.on::before {
+            background: transparent;
+        }
+
+        /* Power indicator LED */
+        .power-led {
+            width: 10px;
+            height: 10px;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .power-led.on {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+        }
+
+        /* TV legs */
+        .tv-legs {
+            display: flex;
+            justify-content: center;
+            gap: 300px;
+            margin-top: -5px;
+        }
+
+        .leg {
+            width: 30px;
+            height: 50px;
+            background: linear-gradient(90deg, #654321 0%, #8B4513 50%, #654321 100%);
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Channel info overlay */
+        .channel-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .channel-info.visible {
+            opacity: 1;
+        }
+
+        .channel-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            background: white;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .channel-info .info {
+            flex: 1;
+        }
+
+        .channel-info .name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .channel-info .group {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Loading spinner */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #333;
+            border-top-color: #00ff00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error message */
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff6b6b;
+            text-align: center;
+            z-index: 15;
+            display: none;
+            padding: 20px;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Antenna */
+        .antenna {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 60px;
+        }
+
+        .antenna-rod {
+            width: 6px;
+            height: 100px;
+            background: linear-gradient(90deg, #888, #aaa, #888);
+            border-radius: 3px;
+            transform-origin: bottom center;
+        }
+
+        .antenna-rod:first-child {
+            transform: rotate(-20deg);
+        }
+
+        .antenna-rod:last-child {
+            transform: rotate(20deg);
+        }
+
+        .antenna-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 15px;
+            background: linear-gradient(180deg, #666, #444);
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* Brand plate */
+        .brand {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, #d4af37, #b8960c);
+            padding: 5px 20px;
+            border-radius: 3px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #2d2d2d;
+            letter-spacing: 3px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Instructions */
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .instructions kbd {
+            background: rgba(255,255,255,0.1);
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin: 0 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="room">
+        <div class="tv-container">
+            <div class="antenna">
+                <div class="antenna-rod"></div>
+                <div class="antenna-base"></div>
+                <div class="antenna-rod"></div>
+            </div>
+
+            <div class="tv">
+                <div class="screen-container">
+                    <div class="screen">
+                        <video id="video-player" playsinline></video>
+                        <div class="static" id="static"></div>
+                        <div class="channel-display" id="channel-display">CH 01</div>
+                        <div class="loading" id="loading"></div>
+                        <div class="error-message" id="error-message">
+                            <div>No Signal</div>
+                            <div style="font-size: 12px; margin-top: 10px;">Try another channel</div>
+                        </div>
+                        <div class="channel-info" id="channel-info">
+                            <img id="channel-logo" src="" alt="">
+                            <div class="info">
+                                <div class="name" id="channel-name"></div>
+                                <div class="group" id="channel-group"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="speaker"></div>
+
+                    <div class="knob-container">
+                        <div class="knob" id="channel-knob" title="Channel"></div>
+                        <div class="knob-label">Channel</div>
+                    </div>
+
+                    <div class="knob-container">
+                        <div class="knob" id="volume-knob" title="Volume"></div>
+                        <div class="knob-label">Volume</div>
+                    </div>
+
+                    <div class="power-led" id="power-led"></div>
+                    <div class="power-btn" id="power-btn" title="Power"></div>
+                </div>
+
+                <div class="brand">CLASSIC TV</div>
+            </div>
+
+            <div class="tv-legs">
+                <div class="leg"></div>
+                <div class="leg"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <kbd>←</kbd> <kbd>→</kbd> Change Channel &nbsp;&nbsp;
+        <kbd>↑</kbd> <kbd>↓</kbd> Volume &nbsp;&nbsp;
+        <kbd>Space</kbd> Power
+    </div>
+
+    <script>
+        // Classic TV App
+        class ClassicTV {
+            constructor() {
+                this.channels = [];
+                this.currentChannel = 0;
+                this.volume = 0.5;
+                this.isPoweredOn = false;
+                this.hls = null;
+                this.channelDisplayTimeout = null;
+                this.infoDisplayTimeout = null;
+
+                // DOM Elements
+                this.video = document.getElementById('video-player');
+                this.staticEl = document.getElementById('static');
+                this.channelDisplay = document.getElementById('channel-display');
+                this.channelInfo = document.getElementById('channel-info');
+                this.channelLogo = document.getElementById('channel-logo');
+                this.channelName = document.getElementById('channel-name');
+                this.channelGroup = document.getElementById('channel-group');
+                this.loading = document.getElementById('loading');
+                this.errorMessage = document.getElementById('error-message');
+                this.powerBtn = document.getElementById('power-btn');
+                this.powerLed = document.getElementById('power-led');
+                this.channelKnob = document.getElementById('channel-knob');
+                this.volumeKnob = document.getElementById('volume-knob');
+
+                this.init();
+            }
+
+            async init() {
+                await this.loadPlaylist();
+                this.setupEventListeners();
+                this.updateVolumeKnob();
+            }
+
+            async loadPlaylist() {
+                try {
+                    const response = await fetch('https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8');
+                    const text = await response.text();
+                    this.parsePlaylist(text);
+                    console.log(`Loaded ${this.channels.length} channels`);
+                } catch (error) {
+                    console.error('Failed to load playlist:', error);
+                }
+            }
+
+            parsePlaylist(text) {
+                const lines = text.split('\n');
+                let currentChannel = null;
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+
+                    if (line.startsWith('#EXTINF:')) {
+                        currentChannel = this.parseExtInf(line);
+                    } else if (line && !line.startsWith('#') && currentChannel) {
+                        currentChannel.url = line;
+                        // Filter out YouTube links as they don't work with HLS
+                        if (!line.includes('youtube.com') && !line.includes('youtu.be')) {
+                            this.channels.push(currentChannel);
+                        }
+                        currentChannel = null;
+                    }
+                }
+            }
+
+            parseExtInf(line) {
+                const channel = {
+                    name: '',
+                    logo: '',
+                    group: '',
+                    id: ''
+                };
+
+                // Extract tvg-name
+                const nameMatch = line.match(/tvg-name="([^"]*)"/);
+                if (nameMatch) channel.name = nameMatch[1];
+
+                // Extract tvg-logo
+                const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+                if (logoMatch) channel.logo = logoMatch[1];
+
+                // Extract group-title
+                const groupMatch = line.match(/group-title="([^"]*)"/);
+                if (groupMatch) channel.group = groupMatch[1];
+
+                // Extract tvg-id
+                const idMatch = line.match(/tvg-id="([^"]*)"/);
+                if (idMatch) channel.id = idMatch[1];
+
+                // Fallback: get display name after the last comma
+                const commaIndex = line.lastIndexOf(',');
+                if (commaIndex !== -1 && !channel.name) {
+                    channel.name = line.substring(commaIndex + 1).trim();
+                }
+
+                return channel;
+            }
+
+            setupEventListeners() {
+                // Power button
+                this.powerBtn.addEventListener('click', () => this.togglePower());
+
+                // Channel knob - click to change
+                this.channelKnob.addEventListener('click', (e) => {
+                    const rect = this.channelKnob.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    if (x > 0) {
+                        this.nextChannel();
+                    } else {
+                        this.prevChannel();
+                    }
+                });
+
+                // Volume knob - click to change
+                this.volumeKnob.addEventListener('click', (e) => {
+                    const rect = this.volumeKnob.getBoundingClientRect();
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    if (y < 0) {
+                        this.volumeUp();
+                    } else {
+                        this.volumeDown();
+                    }
+                });
+
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case 'ArrowRight':
+                            this.nextChannel();
+                            break;
+                        case 'ArrowLeft':
+                            this.prevChannel();
+                            break;
+                        case 'ArrowUp':
+                            this.volumeUp();
+                            break;
+                        case 'ArrowDown':
+                            this.volumeDown();
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            this.togglePower();
+                            break;
+                    }
+                });
+
+                // Mouse wheel on knobs
+                this.channelKnob.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (e.deltaY < 0) this.nextChannel();
+                    else this.prevChannel();
+                });
+
+                this.volumeKnob.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (e.deltaY < 0) this.volumeUp();
+                    else this.volumeDown();
+                });
+
+                // Video events
+                this.video.addEventListener('playing', () => {
+                    this.loading.classList.remove('active');
+                    this.errorMessage.classList.remove('active');
+                    this.staticEl.classList.remove('active');
+                });
+
+                this.video.addEventListener('waiting', () => {
+                    this.loading.classList.add('active');
+                });
+
+                this.video.addEventListener('error', () => {
+                    this.showError();
+                });
+            }
+
+            togglePower() {
+                this.isPoweredOn = !this.isPoweredOn;
+
+                if (this.isPoweredOn) {
+                    this.powerOn();
+                } else {
+                    this.powerOff();
+                }
+            }
+
+            powerOn() {
+                this.powerBtn.classList.add('on');
+                this.powerLed.classList.add('on');
+                this.staticEl.classList.add('active');
+
+                // Small delay before playing
+                setTimeout(() => {
+                    if (this.channels.length > 0) {
+                        this.playChannel(this.currentChannel);
+                    }
+                }, 500);
+            }
+
+            powerOff() {
+                this.powerBtn.classList.remove('on');
+                this.powerLed.classList.remove('on');
+                this.staticEl.classList.remove('active');
+                this.loading.classList.remove('active');
+                this.errorMessage.classList.remove('active');
+                this.channelDisplay.classList.remove('visible');
+                this.channelInfo.classList.remove('visible');
+
+                if (this.hls) {
+                    this.hls.destroy();
+                    this.hls = null;
+                }
+                this.video.src = '';
+                this.video.load();
+            }
+
+            nextChannel() {
+                if (!this.isPoweredOn || this.channels.length === 0) return;
+                this.currentChannel = (this.currentChannel + 1) % this.channels.length;
+                this.playChannel(this.currentChannel);
+                this.animateChannelKnob(1);
+            }
+
+            prevChannel() {
+                if (!this.isPoweredOn || this.channels.length === 0) return;
+                this.currentChannel = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
+                this.playChannel(this.currentChannel);
+                this.animateChannelKnob(-1);
+            }
+
+            playChannel(index) {
+                const channel = this.channels[index];
+                if (!channel) return;
+
+                // Show static during channel change
+                this.staticEl.classList.add('active');
+                this.loading.classList.add('active');
+                this.errorMessage.classList.remove('active');
+
+                // Update display
+                this.showChannelDisplay(index + 1);
+                this.showChannelInfo(channel);
+
+                // Destroy previous HLS instance
+                if (this.hls) {
+                    this.hls.destroy();
+                    this.hls = null;
+                }
+
+                const url = channel.url;
+
+                // Check if it's an HLS stream
+                if (url.includes('.m3u8')) {
+                    if (Hls.isSupported()) {
+                        this.hls = new Hls({
+                            enableWorker: true,
+                            lowLatencyMode: true,
+                        });
+                        this.hls.loadSource(url);
+                        this.hls.attachMedia(this.video);
+                        this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            this.video.play().catch(() => {});
+                        });
+                        this.hls.on(Hls.Events.ERROR, (event, data) => {
+                            if (data.fatal) {
+                                this.showError();
+                            }
+                        });
+                    } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+                        // Safari native HLS
+                        this.video.src = url;
+                        this.video.play().catch(() => {});
+                    }
+                } else {
+                    // Direct video URL
+                    this.video.src = url;
+                    this.video.play().catch(() => {});
+                }
+
+                this.video.volume = this.volume;
+            }
+
+            showChannelDisplay(num) {
+                this.channelDisplay.textContent = `CH ${num.toString().padStart(2, '0')}`;
+                this.channelDisplay.classList.add('visible');
+
+                clearTimeout(this.channelDisplayTimeout);
+                this.channelDisplayTimeout = setTimeout(() => {
+                    this.channelDisplay.classList.remove('visible');
+                }, 3000);
+            }
+
+            showChannelInfo(channel) {
+                this.channelName.textContent = channel.name;
+                this.channelGroup.textContent = channel.group;
+
+                if (channel.logo) {
+                    this.channelLogo.src = channel.logo;
+                    this.channelLogo.style.display = 'block';
+                } else {
+                    this.channelLogo.style.display = 'none';
+                }
+
+                this.channelInfo.classList.add('visible');
+
+                clearTimeout(this.infoDisplayTimeout);
+                this.infoDisplayTimeout = setTimeout(() => {
+                    this.channelInfo.classList.remove('visible');
+                }, 5000);
+            }
+
+            showError() {
+                this.loading.classList.remove('active');
+                this.staticEl.classList.add('active');
+                this.errorMessage.classList.add('active');
+            }
+
+            volumeUp() {
+                this.volume = Math.min(1, this.volume + 0.1);
+                this.video.volume = this.volume;
+                this.updateVolumeKnob();
+            }
+
+            volumeDown() {
+                this.volume = Math.max(0, this.volume - 0.1);
+                this.video.volume = this.volume;
+                this.updateVolumeKnob();
+            }
+
+            animateChannelKnob(direction) {
+                const currentRotation = (this.currentChannel * 15) % 360;
+                this.channelKnob.style.setProperty('--rotation', `${currentRotation}deg`);
+            }
+
+            updateVolumeKnob() {
+                // Map volume (0-1) to rotation (-135 to 135 degrees)
+                const rotation = (this.volume * 270) - 135;
+                this.volumeKnob.style.setProperty('--rotation', `${rotation}deg`);
+            }
+        }
+
+        // Initialize the TV when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.tv = new ClassicTV();
+        });
+    </script>
+</body>
+</html>
