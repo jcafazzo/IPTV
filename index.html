@@ -126,6 +126,29 @@
             height: 100%;
             object-fit: contain;
             background: #000;
+            cursor: pointer;
+        }
+
+        /* Fullscreen styles */
+        .screen:fullscreen,
+        .screen:-webkit-full-screen {
+            background: #000;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .screen:fullscreen #video-player,
+        .screen:-webkit-full-screen #video-player {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+        }
+
+        .screen:fullscreen::before,
+        .screen:fullscreen::after,
+        .screen:-webkit-full-screen::before,
+        .screen:-webkit-full-screen::after {
+            display: none;
         }
 
         /* Static noise effect */
@@ -751,7 +774,9 @@
         <kbd>←</kbd> <kbd>→</kbd> Channel &nbsp;
         <kbd>↑</kbd> <kbd>↓</kbd> Volume &nbsp;
         <kbd>Space</kbd> Power &nbsp;
-        <kbd>A-Z</kbd> Jump to country
+        <kbd>A-Z</kbd> Jump to country &nbsp;
+        <kbd>F</kbd> Fullscreen &nbsp;
+        <kbd>Esc</kbd> Exit
     </div>
 
     <script>
@@ -1192,8 +1217,19 @@
 
                 // Keyboard controls
                 document.addEventListener('keydown', (e) => {
-                    // Letter keys A-Z for country jump
-                    if (/^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+                    // Don't handle keys when in fullscreen and pressing escape (let browser handle it)
+                    if (e.key === 'Escape') return;
+
+                    // F key for fullscreen
+                    if (e.key === 'f' || e.key === 'F') {
+                        if (!e.ctrlKey && !e.metaKey) {
+                            this.toggleFullscreen();
+                            return;
+                        }
+                    }
+
+                    // Letter keys A-Z for country jump (except F which is fullscreen)
+                    if (/^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() !== 'f') {
                         this.jumpToLetter(e.key.toUpperCase());
                         return;
                     }
@@ -1263,6 +1299,30 @@
                         this.updateStatusDisplay();
                     }
                 });
+
+                // Click on video to toggle fullscreen
+                this.video.addEventListener('click', () => {
+                    this.toggleFullscreen();
+                });
+            }
+
+            toggleFullscreen() {
+                if (!this.isPoweredOn) return;
+
+                const screen = document.querySelector('.screen');
+
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else if (document.webkitFullscreenElement) {
+                    document.webkitExitFullscreen();
+                } else {
+                    // Request fullscreen on the screen container for a better experience
+                    if (screen.requestFullscreen) {
+                        screen.requestFullscreen();
+                    } else if (screen.webkitRequestFullscreen) {
+                        screen.webkitRequestFullscreen();
+                    }
+                }
             }
 
             togglePower() {
