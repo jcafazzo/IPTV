@@ -543,13 +543,6 @@
         }
 
         /* Cable Box Remote */
-        .remote-container {
-            position: fixed;
-            bottom: 20px;
-            right: 30px;
-            z-index: 200;
-        }
-
         .remote-wire {
             position: absolute;
             bottom: 100%;
@@ -878,27 +871,26 @@
             width: 100%;
             height: 100%;
             min-height: 500px;
+            /* Fallback gradient if image fails to load */
+            background-color: #0d2137;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/World_location_map_%28equirectangular_180%29.svg/2560px-World_location_map_%28equirectangular_180%29.svg.png');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: saturate(0.7) brightness(0.5) hue-rotate(180deg);
         }
 
-        .map-svg {
+        /* Preload indicator while map loads */
+        .world-map::before {
+            content: 'Loading map...';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .map-svg path {
-            fill: #1a3a5a;
-            stroke: #3a6a9a;
-            stroke-width: 1.5;
-            filter: drop-shadow(0 2px 4px rgba(0,100,150,0.3));
-            transition: fill 0.3s, filter 0.3s;
-        }
-
-        .map-svg path:hover {
-            fill: #2a5a7a;
-            filter: drop-shadow(0 4px 8px rgba(74,222,128,0.4));
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #4ade80;
+            font-size: 18px;
+            opacity: 0.5;
+            z-index: 0;
         }
 
         /* TV Marker on map */
@@ -1140,44 +1132,6 @@
         </div>
         <div class="map-container" id="map-container">
             <div class="world-map" id="world-map">
-                <!-- World Map SVG -->
-                <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" class="map-svg">
-                    <!-- Simplified World Map Paths -->
-                    <!-- North America -->
-                    <path d="M165,120 L180,95 L220,90 L250,100 L260,120 L240,140 L230,180 L200,200 L180,190 L150,200 L130,180 L120,150 L140,130 Z" />
-                    <path d="M130,200 L150,210 L180,200 L200,210 L220,250 L200,280 L170,290 L140,270 L120,240 L125,210 Z" />
-                    <!-- Greenland -->
-                    <path d="M320,60 L360,50 L400,60 L410,90 L390,110 L350,115 L320,100 L310,80 Z" />
-                    <!-- South America -->
-                    <path d="M230,280 L260,270 L290,290 L310,330 L320,380 L300,430 L270,450 L240,430 L230,380 L240,340 L220,310 Z" />
-                    <!-- Europe -->
-                    <path d="M460,130 L480,120 L520,125 L550,140 L560,160 L540,180 L510,190 L480,185 L460,170 L450,150 Z" />
-                    <!-- UK/Ireland -->
-                    <path d="M440,140 L450,135 L455,150 L448,160 L438,155 Z" />
-                    <path d="M455,130 L465,125 L470,140 L465,155 L455,150 L450,140 Z" />
-                    <!-- Scandinavia -->
-                    <path d="M500,90 L515,70 L530,80 L540,110 L530,130 L510,125 L500,110 Z" />
-                    <!-- Africa -->
-                    <path d="M480,200 L520,190 L560,200 L590,230 L600,280 L590,340 L560,380 L520,390 L480,370 L460,320 L470,260 L460,220 Z" />
-                    <!-- Middle East -->
-                    <path d="M560,180 L600,170 L640,180 L660,210 L640,240 L600,250 L570,230 L560,200 Z" />
-                    <!-- Russia/Asia -->
-                    <path d="M560,100 L620,80 L700,70 L780,80 L850,100 L880,130 L870,160 L820,180 L760,170 L700,180 L640,170 L600,150 L570,130 Z" />
-                    <!-- India -->
-                    <path d="M660,220 L700,210 L720,240 L710,290 L680,310 L650,290 L660,250 Z" />
-                    <!-- Southeast Asia -->
-                    <path d="M720,250 L760,240 L790,260 L800,300 L780,320 L740,310 L720,280 Z" />
-                    <!-- China -->
-                    <path d="M720,160 L780,150 L820,170 L830,200 L800,230 L750,240 L720,220 L710,190 Z" />
-                    <!-- Japan -->
-                    <path d="M860,170 L875,160 L885,180 L880,210 L865,220 L855,200 L858,180 Z" />
-                    <!-- Indonesia -->
-                    <path d="M760,320 L820,310 L860,330 L850,350 L800,360 L760,350 L750,335 Z" />
-                    <!-- Australia -->
-                    <path d="M800,380 L860,370 L900,390 L910,430 L880,460 L830,470 L790,450 L780,410 Z" />
-                    <!-- New Zealand -->
-                    <path d="M920,420 L935,415 L945,440 L935,460 L920,455 L915,435 Z" />
-                </svg>
                 <div class="map-grid"></div>
                 <div class="map-scanline"></div>
                 <!-- Markers will be dynamically generated -->
@@ -1413,11 +1367,18 @@
                 this.isScanning = false;
                 this.scanBtn.classList.remove('scanning');
                 this.scanBtn.textContent = 'SCAN';
-                // Clean up all workers
+                // Clean up all workers and remove video elements from DOM
                 this.scanWorkers.forEach(w => {
                     clearTimeout(w.timeout);
                     if (w.hls) w.hls.destroy();
+                    if (w.onPlaying) {
+                        w.video.removeEventListener('playing', w.onPlaying);
+                    }
                     w.video.src = '';
+                    w.video.load();
+                    if (w.video.parentNode) {
+                        w.video.parentNode.removeChild(w.video);
+                    }
                 });
                 this.scanWorkers = [];
             }
@@ -1470,24 +1431,29 @@
                 const channel = this.channels[index];
                 this.updateRemoteDisplay(`SCAN ${index + 1}/${this.channels.length}`);
 
-                // Clean up previous
+                // Clean up previous - remove old event listeners
                 clearTimeout(worker.timeout);
                 if (worker.hls) {
                     worker.hls.destroy();
                     worker.hls = null;
                 }
+                if (worker.onPlaying) {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                }
+                worker.video.src = '';
 
                 // 4 second timeout for faster scanning
                 worker.timeout = setTimeout(() => this.onWorkerFail(worker), 4000);
 
                 const url = channel.url;
 
-                // Set up success handler
-                const onPlaying = () => {
-                    worker.video.removeEventListener('playing', onPlaying);
+                // Set up success handler - store reference for cleanup
+                worker.onPlaying = () => {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                    worker.onPlaying = null;
                     this.onWorkerSuccess(worker);
                 };
-                worker.video.addEventListener('playing', onPlaying);
+                worker.video.addEventListener('playing', worker.onPlaying);
 
                 if (url.includes('.m3u8') && Hls.isSupported()) {
                     worker.hls = new Hls({ enableWorker: false }); // Disable worker for speed
@@ -1536,6 +1502,12 @@
             onWorkerFail(worker) {
                 if (!this.isScanning || worker.index === -1) return;
                 clearTimeout(worker.timeout);
+
+                // Clean up event listener
+                if (worker.onPlaying) {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                    worker.onPlaying = null;
+                }
 
                 const ch = this.channels[worker.index];
                 if (ch) {
@@ -1882,48 +1854,57 @@
                 // Remove old markers
                 worldMap.querySelectorAll('.map-marker').forEach(m => m.remove());
 
-                // Country coordinates (percentage of map: x=left%, y=top%)
+                // Country coordinates for equirectangular 180° centered map
+                // Formula: x = (longitude + 180) / 360 * 100, y = (90 - latitude) / 180 * 100
                 const countryCoords = {
-                    'USA': { x: 18, y: 38 }, 'United States': { x: 18, y: 38 },
-                    'Canada': { x: 18, y: 28 }, 'Mexico': { x: 15, y: 48 },
-                    'Brazil': { x: 32, y: 65 }, 'Argentina': { x: 28, y: 78 },
-                    'Chile': { x: 25, y: 75 }, 'Colombia': { x: 24, y: 52 },
-                    'Peru': { x: 23, y: 60 }, 'Venezuela': { x: 27, y: 50 },
-                    'Ecuador': { x: 22, y: 55 }, 'Cuba': { x: 22, y: 46 },
-                    'UK': { x: 47, y: 30 }, 'United Kingdom': { x: 47, y: 30 },
-                    'Germany': { x: 51, y: 32 }, 'France': { x: 49, y: 35 },
-                    'Spain': { x: 46, y: 40 }, 'Italy': { x: 52, y: 38 },
-                    'Netherlands': { x: 50, y: 30 }, 'Belgium': { x: 49, y: 32 },
-                    'Portugal': { x: 44, y: 40 }, 'Poland': { x: 54, y: 32 },
-                    'Sweden': { x: 53, y: 24 }, 'Norway': { x: 51, y: 22 },
-                    'Denmark': { x: 51, y: 28 }, 'Finland': { x: 56, y: 22 },
-                    'Austria': { x: 53, y: 35 }, 'Switzerland': { x: 50, y: 35 },
-                    'Greece': { x: 55, y: 42 }, 'Turkey': { x: 58, y: 40 },
-                    'Russia': { x: 70, y: 28 }, 'Ukraine': { x: 58, y: 33 },
-                    'Romania': { x: 56, y: 36 }, 'Bulgaria': { x: 56, y: 38 },
-                    'Hungary': { x: 54, y: 35 }, 'Czech': { x: 53, y: 33 },
-                    'Slovakia': { x: 54, y: 34 }, 'Croatia': { x: 53, y: 37 },
-                    'Serbia': { x: 55, y: 37 }, 'Slovenia': { x: 52, y: 36 },
-                    'Ireland': { x: 44, y: 30 }, 'Iceland': { x: 42, y: 20 },
-                    'Albania': { x: 54, y: 40 }, 'Latvia': { x: 56, y: 28 },
-                    'Lithuania': { x: 55, y: 28 }, 'Estonia': { x: 56, y: 26 },
-                    'Luxembourg': { x: 49, y: 33 },
-                    'China': { x: 78, y: 42 }, 'Japan': { x: 87, y: 40 },
-                    'Korea': { x: 84, y: 40 }, 'South Korea': { x: 84, y: 40 },
-                    'India': { x: 70, y: 48 }, 'Pakistan': { x: 67, y: 44 },
-                    'Bangladesh': { x: 73, y: 48 }, 'Thailand': { x: 77, y: 52 },
-                    'Vietnam': { x: 79, y: 52 }, 'Indonesia': { x: 80, y: 60 },
-                    'Malaysia': { x: 78, y: 56 }, 'Singapore': { x: 78, y: 58 },
-                    'Philippines': { x: 83, y: 52 }, 'Taiwan': { x: 83, y: 46 },
-                    'Australia': { x: 85, y: 72 }, 'New Zealand': { x: 92, y: 78 },
-                    'Egypt': { x: 57, y: 46 }, 'South Africa': { x: 56, y: 74 },
-                    'Morocco': { x: 45, y: 44 }, 'Algeria': { x: 49, y: 44 },
-                    'Tunisia': { x: 51, y: 42 }, 'Nigeria': { x: 51, y: 52 },
-                    'Kenya': { x: 60, y: 58 }, 'Ethiopia': { x: 60, y: 52 },
-                    'Israel': { x: 58, y: 44 }, 'Saudi Arabia': { x: 62, y: 48 },
-                    'UAE': { x: 65, y: 48 }, 'Iran': { x: 64, y: 44 },
-                    'Iraq': { x: 62, y: 44 }, 'Afghanistan': { x: 68, y: 44 },
-                    'International': { x: 50, y: 50 }, 'Unknown': { x: 50, y: 85 }
+                    // North America
+                    'USA': { x: 22, y: 28 }, 'United States': { x: 22, y: 28 },
+                    'Canada': { x: 22, y: 22 }, 'Mexico': { x: 20, y: 37 },
+                    // South America
+                    'Brazil': { x: 35, y: 56 }, 'Argentina': { x: 32, y: 67 },
+                    'Chile': { x: 30, y: 64 }, 'Colombia': { x: 29, y: 53 },
+                    'Peru': { x: 28, y: 56 }, 'Venezuela': { x: 31, y: 52 },
+                    'Ecuador': { x: 28, y: 51 }, 'Cuba': { x: 28, y: 38 },
+                    // Europe
+                    'UK': { x: 50, y: 21 }, 'United Kingdom': { x: 50, y: 21 },
+                    'Germany': { x: 53, y: 24 }, 'France': { x: 51, y: 26 },
+                    'Spain': { x: 49, y: 28 }, 'Italy': { x: 53, y: 28 },
+                    'Netherlands': { x: 51, y: 23 }, 'Belgium': { x: 51, y: 24 },
+                    'Portugal': { x: 47, y: 29 }, 'Poland': { x: 55, y: 23 },
+                    'Sweden': { x: 54, y: 17 }, 'Norway': { x: 53, y: 16 },
+                    'Denmark': { x: 53, y: 20 }, 'Finland': { x: 56, y: 17 },
+                    'Austria': { x: 54, y: 26 }, 'Switzerland': { x: 52, y: 26 },
+                    'Greece': { x: 55, y: 29 }, 'Turkey': { x: 58, y: 29 },
+                    'Russia': { x: 72, y: 18 }, 'Ukraine': { x: 58, y: 24 },
+                    'Romania': { x: 56, y: 26 }, 'Bulgaria': { x: 56, y: 28 },
+                    'Hungary': { x: 55, y: 26 }, 'Czech': { x: 54, y: 24 },
+                    'Slovakia': { x: 55, y: 25 }, 'Croatia': { x: 54, y: 27 },
+                    'Serbia': { x: 55, y: 27 }, 'Slovenia': { x: 54, y: 26 },
+                    'Ireland': { x: 48, y: 22 }, 'Iceland': { x: 44, y: 14 },
+                    'Albania': { x: 55, y: 29 }, 'Latvia': { x: 56, y: 19 },
+                    'Lithuania': { x: 56, y: 20 }, 'Estonia': { x: 56, y: 18 },
+                    'Luxembourg': { x: 51, y: 24 },
+                    // Asia
+                    'China': { x: 80, y: 32 }, 'Japan': { x: 89, y: 30 },
+                    'Korea': { x: 86, y: 31 }, 'South Korea': { x: 86, y: 31 },
+                    'India': { x: 72, y: 38 }, 'Pakistan': { x: 69, y: 34 },
+                    'Bangladesh': { x: 74, y: 38 }, 'Thailand': { x: 78, y: 43 },
+                    'Vietnam': { x: 79, y: 44 }, 'Indonesia': { x: 82, y: 52 },
+                    'Malaysia': { x: 78, y: 52 }, 'Singapore': { x: 79, y: 51 },
+                    'Philippines': { x: 84, y: 43 }, 'Taiwan': { x: 84, y: 37 },
+                    // Oceania
+                    'Australia': { x: 87, y: 65 }, 'New Zealand': { x: 97, y: 71 },
+                    // Africa
+                    'Egypt': { x: 58, y: 35 }, 'South Africa': { x: 56, y: 66 },
+                    'Morocco': { x: 48, y: 33 }, 'Algeria': { x: 51, y: 35 },
+                    'Tunisia': { x: 53, y: 32 }, 'Nigeria': { x: 52, y: 45 },
+                    'Kenya': { x: 60, y: 51 }, 'Ethiopia': { x: 60, y: 47 },
+                    // Middle East
+                    'Israel': { x: 59, y: 33 }, 'Saudi Arabia': { x: 62, y: 38 },
+                    'UAE': { x: 65, y: 38 }, 'Iran': { x: 64, y: 33 },
+                    'Iraq': { x: 62, y: 33 }, 'Afghanistan': { x: 68, y: 33 },
+                    // Special
+                    'International': { x: 50, y: 45 }, 'Unknown': { x: 50, y: 85 }
                 };
 
                 // Build country data
@@ -1993,16 +1974,17 @@
             }
 
             guessCoordinates(country) {
-                // Try to guess based on partial matches
+                // Try to guess based on partial matches (coordinates for equirectangular 180° map)
                 const countryLower = country.toLowerCase();
-                if (countryLower.includes('latin') || countryLower.includes('latino')) return { x: 20, y: 55 };
-                if (countryLower.includes('arab') || countryLower.includes('middle east')) return { x: 60, y: 45 };
-                if (countryLower.includes('africa')) return { x: 55, y: 55 };
-                if (countryLower.includes('asia')) return { x: 75, y: 45 };
-                if (countryLower.includes('europe')) return { x: 52, y: 35 };
-                if (countryLower.includes('america')) return { x: 20, y: 45 };
-                // Default position for unknown
-                return { x: 50 + Math.random() * 10 - 5, y: 80 + Math.random() * 10 };
+                if (countryLower.includes('latin') || countryLower.includes('latino')) return { x: 28, y: 52 };
+                if (countryLower.includes('arab') || countryLower.includes('middle east')) return { x: 62, y: 35 };
+                if (countryLower.includes('africa')) return { x: 55, y: 50 };
+                if (countryLower.includes('asia')) return { x: 78, y: 35 };
+                if (countryLower.includes('europe')) return { x: 53, y: 25 };
+                if (countryLower.includes('america')) return { x: 25, y: 35 };
+                if (countryLower.includes('oceania') || countryLower.includes('pacific')) return { x: 90, y: 60 };
+                // Default position for unknown - bottom of map
+                return { x: 50 + Math.random() * 10 - 5, y: 88 };
             }
 
             getCountryFlag(country) {
