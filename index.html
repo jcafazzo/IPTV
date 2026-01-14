@@ -676,6 +676,7 @@
                 <div class="screen-container">
                     <div class="screen">
                         <video id="video-player" playsinline></video>
+                        <video id="scan-video" playsinline style="display:none"></video>
                         <div class="static" id="static"></div>
                         <div class="channel-display" id="channel-display">CH 01</div>
                         <div class="loading" id="loading"></div>
@@ -767,8 +768,12 @@
                 this.infoDisplayTimeout = null;
                 this.countryIndex = {};
                 this.loadTimeout = null;
+
+                // Background scanning (independent)
                 this.isScanning = false;
                 this.scanIndex = 0;
+                this.scanHls = null;
+                this.scanTimeout = null;
 
                 // Channel status tracking (persisted)
                 this.failedChannels = new Set();
@@ -777,6 +782,7 @@
 
                 // DOM Elements
                 this.video = document.getElementById('video-player');
+                this.scanVideo = document.getElementById('scan-video');
                 this.staticEl = document.getElementById('static');
                 this.channelDisplay = document.getElementById('channel-display');
                 this.channelInfo = document.getElementById('channel-info');
@@ -891,29 +897,39 @@
                 this.isScanning = true;
                 this.scanBtn.classList.add('scanning');
                 this.scanBtn.textContent = 'STOP';
-                this.scanIndex = this.currentChannel;
-                this.scanNext();
+                this.scanIndex = 0;
+                this.setupScanVideo();
+                this.scanNextChannel();
             }
 
             stopScan() {
                 this.isScanning = false;
                 this.scanBtn.classList.remove('scanning');
                 this.scanBtn.textContent = 'SCAN';
-                clearTimeout(this.loadTimeout);
+                clearTimeout(this.scanTimeout);
+                if (this.scanHls) {
+                    this.scanHls.destroy();
+                    this.scanHls = null;
+                }
+                this.scanVideo.src = '';
             }
 
-            scanNext() {
+            setupScanVideo() {
+                // Set up events for the background scan video
+                this.scanVideo.addEventListener('playing', () => this.onScanSuccess(), { once: false });
+                this.scanVideo.addEventListener('error', () => this.onScanFail(), { once: false });
+            }
+
+            scanNextChannel() {
                 if (!this.isScanning) return;
 
                 // Find next untested channel
                 let found = false;
-                let startIndex = this.scanIndex;
-                for (let i = 0; i < this.channels.length; i++) {
-                    const idx = (startIndex + i) % this.channels.length;
-                    const ch = this.channels[idx];
+                for (let i = this.scanIndex; i < this.channels.length; i++) {
+                    const ch = this.channels[i];
                     const key = ch.name + ch.url;
                     if (!this.workingChannels.has(key) && !this.failedChannels.has(key)) {
-                        this.scanIndex = idx;
+                        this.scanIndex = i;
                         found = true;
                         break;
                     }
@@ -925,9 +941,74 @@
                     return;
                 }
 
-                this.currentChannel = this.scanIndex;
                 this.updateRemoteDisplay(`SCAN ${this.scanIndex + 1}/${this.channels.length}`);
-                this.playChannel(this.scanIndex, true);
+                this.testChannel(this.scanIndex);
+            }
+
+            testChannel(index) {
+                const channel = this.channels[index];
+                if (!channel) return;
+
+                clearTimeout(this.scanTimeout);
+
+                if (this.scanHls) {
+                    this.scanHls.destroy();
+                    this.scanHls = null;
+                }
+
+                // Timeout for this channel test
+                this.scanTimeout = setTimeout(() => this.onScanFail(), 8000);
+
+                const url = channel.url;
+
+                if (url.includes('.m3u8') && Hls.isSupported()) {
+                    this.scanHls = new Hls({ enableWorker: true });
+                    this.scanHls.loadSource(url);
+                    this.scanHls.attachMedia(this.scanVideo);
+                    this.scanHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        this.scanVideo.play().catch(() => this.onScanFail());
+                    });
+                    this.scanHls.on(Hls.Events.ERROR, (e, data) => {
+                        if (data.fatal) this.onScanFail();
+                    });
+                } else {
+                    this.scanVideo.src = url;
+                    this.scanVideo.play().catch(() => this.onScanFail());
+                }
+            }
+
+            onScanSuccess() {
+                if (!this.isScanning) return;
+                clearTimeout(this.scanTimeout);
+
+                const ch = this.channels[this.scanIndex];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.workingChannels.add(key);
+                    this.failedChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                }
+
+                this.scanIndex++;
+                setTimeout(() => this.scanNextChannel(), 500);
+            }
+
+            onScanFail() {
+                if (!this.isScanning) return;
+                clearTimeout(this.scanTimeout);
+
+                const ch = this.channels[this.scanIndex];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.failedChannels.add(key);
+                    this.workingChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                }
+
+                this.scanIndex++;
+                this.scanNextChannel();
             }
 
             jumpToLetter(letter) {
@@ -935,7 +1016,6 @@
                     this.updateRemoteDisplay('POWER OFF');
                     return;
                 }
-                if (this.isScanning) this.stopScan();
 
                 const entries = this.countryIndex[letter];
                 if (!entries || entries.length === 0) {
@@ -1093,13 +1173,21 @@
                     else this.volumeDown();
                 });
 
-                // Video events
+                // Video events for main player
                 this.video.addEventListener('playing', () => {
                     this.loading.classList.remove('active');
                     this.errorMessage.classList.remove('active');
                     this.staticEl.classList.remove('active');
                     clearTimeout(this.loadTimeout);
-                    this.markChannelWorking();
+                    // Mark as working when user watches it
+                    const ch = this.channels[this.currentChannel];
+                    if (ch) {
+                        const key = ch.name + ch.url;
+                        this.workingChannels.add(key);
+                        this.failedChannels.delete(key);
+                        this.saveChannelStatus();
+                        this.updateStatusDisplay();
+                    }
                 });
 
                 this.video.addEventListener('waiting', () => {
@@ -1107,42 +1195,17 @@
                 });
 
                 this.video.addEventListener('error', () => {
-                    this.markChannelFailed();
+                    this.showError();
+                    // Mark as failed
+                    const ch = this.channels[this.currentChannel];
+                    if (ch) {
+                        const key = ch.name + ch.url;
+                        this.failedChannels.add(key);
+                        this.workingChannels.delete(key);
+                        this.saveChannelStatus();
+                        this.updateStatusDisplay();
+                    }
                 });
-            }
-
-            markChannelWorking() {
-                const ch = this.channels[this.currentChannel];
-                if (!ch) return;
-                const key = ch.name + ch.url;
-                this.workingChannels.add(key);
-                this.failedChannels.delete(key);
-                this.saveChannelStatus();
-                this.updateStatusDisplay();
-
-                if (this.isScanning) {
-                    // Move to next channel after brief pause
-                    setTimeout(() => {
-                        this.scanIndex++;
-                        this.scanNext();
-                    }, 2000);
-                }
-            }
-
-            markChannelFailed() {
-                const ch = this.channels[this.currentChannel];
-                if (!ch) return;
-                const key = ch.name + ch.url;
-                this.failedChannels.add(key);
-                this.workingChannels.delete(key);
-                this.saveChannelStatus();
-                this.updateStatusDisplay();
-                this.showError();
-
-                if (this.isScanning) {
-                    this.scanIndex++;
-                    this.scanNext();
-                }
             }
 
             togglePower() {
@@ -1191,7 +1254,6 @@
 
             nextChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
-                if (this.isScanning) this.stopScan();
 
                 // Skip failed channels
                 let attempts = 0;
@@ -1206,7 +1268,6 @@
 
             prevChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
-                if (this.isScanning) this.stopScan();
 
                 // Skip failed channels
                 let attempts = 0;
@@ -1225,7 +1286,7 @@
                 return this.failedChannels.has(ch.name + ch.url);
             }
 
-            playChannel(index, isScanning = false) {
+            playChannel(index) {
                 const channel = this.channels[index];
                 if (!channel) return;
 
@@ -1246,11 +1307,10 @@
                     this.hls = null;
                 }
 
-                // Set timeout to mark as failed if no response
-                const timeout = isScanning ? 8000 : 15000;
+                // Timeout to show error if channel doesn't load
                 this.loadTimeout = setTimeout(() => {
-                    this.markChannelFailed();
-                }, timeout);
+                    this.showError();
+                }, 15000);
 
                 const url = channel.url;
 
@@ -1268,7 +1328,7 @@
                         });
                         this.hls.on(Hls.Events.ERROR, (event, data) => {
                             if (data.fatal) {
-                                this.markChannelFailed();
+                                this.showError();
                             }
                         });
                     } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
