@@ -1,13 +1,14 @@
 {
-  "name": "Classic Vintage TV",
-  "short_name": "Vintage TV",
-  "description": "A whimsical vintage TV app for watching live IPTV channels from around the world",
+  "name": "TeleArgentina de Adela - Retro TV",
+  "short_name": "TeleArgentina",
+  "description": "TeleArgentina de Adela - Para mi nieto querido. Tu TV argentina favorita con todos los canales del país.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#1a1a2e",
-  "theme_color": "#8B4513",
+  "background_color": "#5D4037",
+  "theme_color": "#5D4037",
   "categories": ["entertainment", "video"],
+  "lang": "es-AR",
   "icons": [
     {
       "src": "icons/icon.svg",
