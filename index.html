@@ -622,6 +622,7 @@
                     const key = channel.name + channel.url;
                     const isWorking = this.workingChannels.has(key);
                     const isFailed = this.failedChannels.has(key);
+                    const isYouTube = this.isYouTubeUrl(channel.url);
 
                     const li = document.createElement('li');
                     li.className = 'channel-item group flex items-center gap-3 cursor-pointer p-1 hover:bg-yellow-100/50 rounded transition-colors';
@@ -639,10 +640,13 @@
                         statusClass = 'text-yellow-600 bg-yellow-200 px-1';
                     }
 
+                    // YouTube badge
+                    const ytBadge = isYouTube ? '<span class="bg-red-600 text-white text-[10px] px-1 rounded font-bold ml-1">YT</span>' : '';
+
                     li.innerHTML = `
                         <div class="font-hand text-2xl text-gray-400 w-8 text-right group-hover:text-red-600">${String(displayOrder + 1).padStart(2, '0')}</div>
                         <div class="flex-1 border-b border-gray-300 pb-1 border-dashed">
-                            <h3 class="font-serif font-bold text-gray-800 text-lg leading-none">${channel.name}</h3>
+                            <h3 class="font-serif font-bold text-gray-800 text-lg leading-none">${channel.name}${ytBadge}</h3>
                             <span class="text-xs font-ui uppercase tracking-wider ${statusClass}">${statusText}</span>
                         </div>
                         ${isWorking ? '<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>' : ''}
@@ -794,60 +798,38 @@
             toggleFullscreen() {
                 if (!this.isPoweredOn) return;
 
-                const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+                // Check if already in fullscreen
+                const fullscreenElement = document.fullscreenElement ||
+                                         document.webkitFullscreenElement ||
+                                         document.mozFullScreenElement ||
+                                         document.msFullscreenElement;
 
-                if (isFullscreen) {
+                if (fullscreenElement) {
                     // Exit fullscreen
-                    try {
-                        if (document.exitFullscreen) {
-                            const result = document.exitFullscreen();
-                            if (result && result.catch) result.catch(e => console.log('Exit fullscreen error:', e));
-                        } else if (document.webkitExitFullscreen) {
-                            document.webkitExitFullscreen();
-                        } else if (document.mozCancelFullScreen) {
-                            document.mozCancelFullScreen();
-                        }
-                    } catch (e) {
-                        console.log('Exit fullscreen error:', e);
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
                     }
                 } else {
-                    // Enter fullscreen - try screen first, then video
-                    const element = this.screen;
-                    const requestFS = element.requestFullscreen ||
-                                     element.webkitRequestFullscreen ||
-                                     element.mozRequestFullScreen ||
-                                     element.msRequestFullscreen;
+                    // Enter fullscreen - use video element directly for best compatibility
+                    const element = this.isYouTubeChannel ? this.youtubePlayer : this.video;
 
-                    if (requestFS) {
-                        try {
-                            const result = requestFS.call(element);
-                            // Handle Promise if returned (modern browsers)
-                            if (result && result.catch) {
-                                result.catch(err => {
-                                    console.log('Fullscreen request failed on screen, trying video:', err);
-                                    this.tryVideoFullscreen();
-                                });
-                            }
-                        } catch (err) {
-                            console.log('Fullscreen error:', err);
-                            this.tryVideoFullscreen();
-                        }
-                    }
-                }
-            }
-
-            tryVideoFullscreen() {
-                const videoFS = this.video.requestFullscreen ||
-                               this.video.webkitRequestFullscreen ||
-                               this.video.mozRequestFullScreen;
-                if (videoFS) {
-                    try {
-                        const result = videoFS.call(this.video);
-                        if (result && result.catch) {
-                            result.catch(e => console.log('Video fullscreen also failed:', e));
-                        }
-                    } catch (e) {
-                        console.log('Video fullscreen error:', e);
+                    if (element.requestFullscreen) {
+                        element.requestFullscreen();
+                    } else if (element.webkitRequestFullscreen) {
+                        element.webkitRequestFullscreen();
+                    } else if (element.webkitEnterFullscreen) {
+                        // iOS Safari
+                        element.webkitEnterFullscreen();
+                    } else if (element.mozRequestFullScreen) {
+                        element.mozRequestFullScreen();
+                    } else if (element.msRequestFullscreen) {
+                        element.msRequestFullscreen();
                     }
                 }
             }
@@ -1001,7 +983,8 @@
                     const allDone = this.scanWorkers.every(w => w.index === -1);
                     if (allDone) {
                         this.stopScan();
-                        if (!this.video.src || this.video.paused) {
+                        // Only auto-select if powered on
+                        if (this.isPoweredOn && (!this.video.src || this.video.paused)) {
                             const firstWorking = this.channels.findIndex(ch =>
                                 this.workingChannels.has(ch.name + ch.url)
                             );
@@ -1071,7 +1054,8 @@
                     this.updateStatusDisplay();
                     this.updateChannelListItem(foundIndex);
 
-                    if (!this.video.src || this.video.error) {
+                    // Only auto-select if powered on and no video playing
+                    if (this.isPoweredOn && (!this.video.src || this.video.error)) {
                         this.selectChannel(foundIndex);
                     }
                 }
