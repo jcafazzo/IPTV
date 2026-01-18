@@ -250,6 +250,14 @@
                         <!-- Video Player -->
                         <video id="video-player" playsinline></video>
 
+                        <!-- YouTube Player (iframe) -->
+                        <iframe id="youtube-player"
+                            class="absolute inset-0 w-full h-full hidden"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                            allowfullscreen>
+                        </iframe>
+
                         <!-- No signal state -->
                         <div id="no-signal" class="absolute inset-0 bg-gray-900 flex items-center justify-center pointer-events-none">
                             <div class="text-center opacity-40">
@@ -468,6 +476,8 @@
                 this.volumeKnob = document.getElementById('volume-knob');
                 this.screen = document.getElementById('screen');
                 this.muteIcon = document.getElementById('mute-icon');
+                this.youtubePlayer = document.getElementById('youtube-player');
+                this.isYouTubeChannel = false;
 
                 this.init();
             }
@@ -552,11 +562,9 @@
                         currentChannel = this.parseExtInf(line);
                     } else if (line && !line.startsWith('#') && currentChannel) {
                         currentChannel.url = line;
-                        // ONLY include Argentina channels
+                        // ONLY include Argentina channels (now includes YouTube)
                         if (currentChannel.group &&
-                            currentChannel.group.toLowerCase().includes('argentina') &&
-                            !line.includes('youtube.com') &&
-                            !line.includes('youtu.be')) {
+                            currentChannel.group.toLowerCase().includes('argentina')) {
                             this.channels.push(currentChannel);
                         }
                         currentChannel = null;
@@ -786,17 +794,66 @@
             toggleFullscreen() {
                 if (!this.isPoweredOn) return;
 
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else if (document.webkitFullscreenElement) {
-                    document.webkitExitFullscreen();
+                const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+
+                if (isFullscreen) {
+                    // Exit fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(e => console.log('Exit fullscreen error:', e));
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    }
                 } else {
-                    if (this.screen.requestFullscreen) {
-                        this.screen.requestFullscreen();
-                    } else if (this.screen.webkitRequestFullscreen) {
-                        this.screen.webkitRequestFullscreen();
+                    // Enter fullscreen - try screen first, then video
+                    const element = this.screen;
+                    const requestFS = element.requestFullscreen ||
+                                     element.webkitRequestFullscreen ||
+                                     element.mozRequestFullScreen ||
+                                     element.msRequestFullscreen;
+
+                    if (requestFS) {
+                        requestFS.call(element).catch(err => {
+                            console.log('Fullscreen request failed on screen, trying video:', err);
+                            // Fallback to video element
+                            const videoFS = this.video.requestFullscreen ||
+                                           this.video.webkitRequestFullscreen ||
+                                           this.video.mozRequestFullScreen;
+                            if (videoFS) {
+                                videoFS.call(this.video).catch(e => console.log('Video fullscreen also failed:', e));
+                            }
+                        });
                     }
                 }
+            }
+
+            // YouTube URL helpers
+            isYouTubeUrl(url) {
+                return url.includes('youtube.com') || url.includes('youtu.be');
+            }
+
+            getYouTubeVideoId(url) {
+                // Handle various YouTube URL formats
+                let videoId = null;
+
+                // youtube.com/watch?v=VIDEO_ID
+                const watchMatch = url.match(/[?&]v=([^&]+)/);
+                if (watchMatch) return watchMatch[1];
+
+                // youtu.be/VIDEO_ID
+                const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+                if (shortMatch) return shortMatch[1];
+
+                // youtube.com/embed/VIDEO_ID
+                const embedMatch = url.match(/youtube\.com\/embed\/([^?&]+)/);
+                if (embedMatch) return embedMatch[1];
+
+                // youtube.com/live/VIDEO_ID
+                const liveMatch = url.match(/youtube\.com\/live\/([^?&]+)/);
+                if (liveMatch) return liveMatch[1];
+
+                return null;
             }
 
             toggleMute() {
@@ -918,6 +975,19 @@
 
                 worker.index = index;
                 const channel = this.channels[index];
+                const url = channel.url;
+
+                // YouTube URLs can't be tested - assume they work
+                if (this.isYouTubeUrl(url)) {
+                    const key = channel.name + url;
+                    this.workingChannels.add(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                    this.updateChannelListItem(index);
+                    worker.index = -1;
+                    this.scanWithWorker(worker);
+                    return;
+                }
 
                 clearTimeout(worker.timeout);
                 if (worker.hls) { worker.hls.destroy(); worker.hls = null; }
@@ -925,8 +995,6 @@
                 worker.video.src = '';
 
                 worker.timeout = setTimeout(() => this.onWorkerFail(worker), 4000);
-
-                const url = channel.url;
 
                 worker.onPlaying = () => {
                     worker.video.removeEventListener('playing', worker.onPlaying);
@@ -1071,6 +1139,12 @@
                 if (this.hls) { this.hls.destroy(); this.hls = null; }
                 this.video.src = '';
                 this.video.load();
+                this.video.classList.remove('hidden');
+
+                // Clear YouTube player
+                this.youtubePlayer.src = '';
+                this.youtubePlayer.classList.add('hidden');
+                this.isYouTubeChannel = false;
 
                 document.querySelectorAll('.channel-item').forEach(item => {
                     item.classList.remove('active');
@@ -1110,11 +1184,23 @@
 
                 if (this.hls) { this.hls.destroy(); this.hls = null; }
 
+                const url = channel.url;
+
+                // Check if it's a YouTube URL
+                if (this.isYouTubeUrl(url)) {
+                    this.playYouTube(url);
+                    return;
+                }
+
+                // Hide YouTube player, show video
+                this.youtubePlayer.classList.add('hidden');
+                this.youtubePlayer.src = '';
+                this.video.classList.remove('hidden');
+                this.isYouTubeChannel = false;
+
                 this.loadTimeout = setTimeout(() => {
                     this.handleChannelError();
                 }, 8000);
-
-                const url = channel.url;
 
                 if (url.includes('.m3u8')) {
                     if (Hls.isSupported()) {
@@ -1138,6 +1224,40 @@
 
                 this.video.volume = this.volume;
                 this.video.muted = this.isMuted;
+            }
+
+            playYouTube(url) {
+                const videoId = this.getYouTubeVideoId(url);
+                if (!videoId) {
+                    console.log('Could not extract YouTube video ID from:', url);
+                    this.handleChannelError();
+                    return;
+                }
+
+                // Hide video element, show YouTube iframe
+                this.video.pause();
+                this.video.src = '';
+                this.video.classList.add('hidden');
+                this.youtubePlayer.classList.remove('hidden');
+                this.isYouTubeChannel = true;
+
+                // Set YouTube embed URL with autoplay
+                const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this.isMuted ? 1 : 0}&enablejsapi=1&rel=0`;
+                this.youtubePlayer.src = embedUrl;
+
+                // Mark as working after a short delay (YouTube doesn't give us load events easily)
+                this.loading.classList.add('hidden');
+                this.noSignal.classList.add('hidden');
+
+                const ch = this.channels[this.currentChannel];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.workingChannels.add(key);
+                    this.failedChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                    this.updateChannelListItem(this.currentChannel);
+                }
             }
 
             showChannelInfo(channel) {
