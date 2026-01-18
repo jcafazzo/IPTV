@@ -404,6 +404,22 @@
 
     <script>
         // TeleArgentina de Adela - Argentina TV App
+
+        // Additional Argentina channels (hardcoded)
+        const EXTRA_ARGENTINA_CHANNELS = [
+            { name: 'Aunar', url: 'https://5fb24b460df87.streamlock.net/live-cont.ar/mirador/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Cine.AR', url: 'https://5fb24b460df87.streamlock.net/live-cont.ar/cinear/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Tec TV', url: 'https://tv.initium.net.ar:3939/live/tectvmainlive.m3u8', group: 'Argentina', logo: '' },
+            { name: 'DeporTV', url: 'https://5fb24b460df87.streamlock.net/live-cont.ar/deportv/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Canal E', url: 'https://unlimited1-us.dps.live/perfiltv/perfiltv.smil/perfiltv/livestream2/chunks.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Telemax', url: 'https://live-edge01.telecentro.net.ar/live/smil:tlx.smil/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Net TV', url: 'https://unlimited1-us.dps.live/nettv/nettv.smil/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'TV Universidad', url: 'https://stratus.stream.cespi.unlp.edu.ar/hls/tvunlp.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Urbana Tevé', url: 'https://cdnhd.iblups.com/hls/DD3nXkAkWk.m3u8', group: 'Argentina', logo: '' },
+            { name: 'El Trece', url: 'https://live-01-02-eltrece.vodgc.net/eltrecetv/index.m3u8', group: 'Argentina', logo: '' },
+            { name: 'El Nueve', url: 'https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8', group: 'Argentina', logo: '' },
+        ];
+
         class TeleArgentina {
             constructor() {
                 this.channels = [];
@@ -489,9 +505,31 @@
                     const response = await fetch('https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8');
                     const text = await response.text();
                     this.parsePlaylist(text);
+
+                    // Add extra hardcoded channels and deduplicate
+                    this.mergeExtraChannels();
+
                     console.log(`🇦🇷 Loaded ${this.channels.length} Argentine channels`);
                 } catch (error) {
                     console.error('Failed to load playlist:', error);
+                    // Still add extra channels if remote fails
+                    this.mergeExtraChannels();
+                }
+            }
+
+            mergeExtraChannels() {
+                // Create a Set of existing channel identifiers for deduplication
+                const existingUrls = new Set(this.channels.map(ch => ch.url.toLowerCase()));
+                const existingNames = new Set(this.channels.map(ch => ch.name.toLowerCase()));
+
+                for (const extra of EXTRA_ARGENTINA_CHANNELS) {
+                    // Skip if URL or name already exists
+                    if (existingUrls.has(extra.url.toLowerCase())) continue;
+                    if (existingNames.has(extra.name.toLowerCase())) continue;
+
+                    this.channels.push({ ...extra });
+                    existingUrls.add(extra.url.toLowerCase());
+                    existingNames.add(extra.name.toLowerCase());
                 }
             }
 
@@ -663,6 +701,12 @@
 
                 // Screen click for fullscreen
                 this.screen.addEventListener('click', () => this.toggleFullscreen());
+
+                // Video click for fullscreen (in case video captures the click)
+                this.video.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleFullscreen();
+                });
 
                 // Channel knob
                 this.channelKnob.addEventListener('click', (e) => {
