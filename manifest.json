@@ -1,13 +1,14 @@
 {
-  "name": "Classic Vintage TV",
-  "short_name": "Vintage TV",
-  "description": "A whimsical vintage TV app for watching live IPTV channels from around the world",
+  "name": "Tele Argentina - TV Argentina",
+  "short_name": "Tele Argentina",
+  "description": "¡Vamos Argentina! Tu TV argentina favorita con todos los canales del país. Mirá tus canales argentinos favoritos.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#1a1a2e",
-  "theme_color": "#8B4513",
+  "background_color": "#75AADB",
+  "theme_color": "#75AADB",
   "categories": ["entertainment", "video"],
+  "lang": "es-AR",
   "icons": [
     {
       "src": "icons/icon.svg",
