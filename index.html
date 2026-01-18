@@ -125,6 +125,9 @@
             height: 100%;
             object-fit: contain;
             background: #000;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
         }
 
         .screen:fullscreen,
@@ -248,7 +251,7 @@
                         <video id="video-player" playsinline></video>
 
                         <!-- No signal state -->
-                        <div id="no-signal" class="absolute inset-0 bg-gray-900 flex items-center justify-center">
+                        <div id="no-signal" class="absolute inset-0 bg-gray-900 flex items-center justify-center pointer-events-none">
                             <div class="text-center opacity-40">
                                 <span class="material-symbols-outlined text-6xl text-white mb-2 animate-pulse">tv_off</span>
                                 <p class="text-white font-ui tracking-widest text-sm opacity-70">SIN SEÑAL</p>
@@ -256,7 +259,7 @@
                         </div>
 
                         <!-- Loading state -->
-                        <div id="loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center hidden">
+                        <div id="loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center hidden pointer-events-none">
                             <div class="text-center">
                                 <span class="material-symbols-outlined text-6xl text-yellow-500 loading-spinner">sports_soccer</span>
                                 <p class="text-white font-ui tracking-widest text-sm mt-2">SINTONIZANDO...</p>
@@ -393,11 +396,15 @@
                 <p class="font-hand text-gray-800 text-lg leading-tight">No olvidarse de apagar la tele nene!</p>
             </div>
 
-            <!-- Scan button -->
-            <div class="p-4 bg-transparent border-t border-gray-300 mt-auto ml-8">
+            <!-- Scan buttons -->
+            <div class="p-4 bg-transparent border-t border-gray-300 mt-auto ml-8 space-y-2">
                 <button id="scan-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-ui uppercase tracking-widest py-2 rounded shadow-md border-b-4 border-red-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 text-sm">
                     <span class="w-2 h-2 bg-white rounded-full" id="scan-indicator"></span>
                     <span id="scan-btn-text">Escanear Canales</span>
+                </button>
+                <button id="rescan-btn" class="w-full bg-wood-base hover:bg-wood-dark text-white font-ui uppercase tracking-widest py-1.5 rounded shadow-md border-b-2 border-wood-dark active:border-b-0 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 text-xs">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    <span>Reescanear Todo</span>
                 </button>
             </div>
         </aside>
@@ -694,6 +701,9 @@
                 // Scan button
                 this.scanBtn.addEventListener('click', () => this.toggleScan());
 
+                // Rescan all button (clears status and rescans everything)
+                document.getElementById('rescan-btn').addEventListener('click', () => this.rescanAll());
+
                 // Fullscreen button
                 document.getElementById('fullscreen-btn').addEventListener('click', () => this.toggleFullscreen());
 
@@ -855,6 +865,24 @@
                     if (w.video.parentNode) w.video.parentNode.removeChild(w.video);
                 });
                 this.scanWorkers = [];
+            }
+
+            rescanAll() {
+                // Stop any current scan
+                if (this.isScanning) this.stopScan();
+
+                // Clear all channel status
+                this.failedChannels.clear();
+                this.workingChannels.clear();
+                this.saveChannelStatus();
+                this.updateStatusDisplay();
+
+                // Rebuild channel list to show "Sin Probar" status
+                this.buildChannelList();
+
+                // Start fresh scan
+                if (!this.isPoweredOn) this.powerOn();
+                this.startScan();
             }
 
             initScanWorkers() {
