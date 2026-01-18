@@ -594,11 +594,26 @@
                     return;
                 }
 
-                this.channels.forEach((channel, index) => {
+                // Create sorted indices: working first, then untested, then failed
+                const sortedIndices = this.channels.map((ch, idx) => idx).sort((a, b) => {
+                    const keyA = this.channels[a].name + this.channels[a].url;
+                    const keyB = this.channels[b].name + this.channels[b].url;
+                    const workingA = this.workingChannels.has(keyA);
+                    const workingB = this.workingChannels.has(keyB);
+                    const failedA = this.failedChannels.has(keyA);
+                    const failedB = this.failedChannels.has(keyB);
+
+                    // Sort order: working (0) > untested (1) > failed (2)
+                    const scoreA = workingA ? 0 : (failedA ? 2 : 1);
+                    const scoreB = workingB ? 0 : (failedB ? 2 : 1);
+                    return scoreA - scoreB;
+                });
+
+                sortedIndices.forEach((index, displayOrder) => {
+                    const channel = this.channels[index];
                     const key = channel.name + channel.url;
                     const isWorking = this.workingChannels.has(key);
                     const isFailed = this.failedChannels.has(key);
-                    const isUntested = !isWorking && !isFailed;
 
                     const li = document.createElement('li');
                     li.className = 'channel-item group flex items-center gap-3 cursor-pointer p-1 hover:bg-yellow-100/50 rounded transition-colors';
@@ -617,7 +632,7 @@
                     }
 
                     li.innerHTML = `
-                        <div class="font-hand text-2xl text-gray-400 w-8 text-right group-hover:text-red-600">${String(index + 1).padStart(2, '0')}</div>
+                        <div class="font-hand text-2xl text-gray-400 w-8 text-right group-hover:text-red-600">${String(displayOrder + 1).padStart(2, '0')}</div>
                         <div class="flex-1 border-b border-gray-300 pb-1 border-dashed">
                             <h3 class="font-serif font-bold text-gray-800 text-lg leading-none">${channel.name}</h3>
                             <span class="text-xs font-ui uppercase tracking-wider ${statusClass}">${statusText}</span>
@@ -640,38 +655,9 @@
             }
 
             updateChannelListItem(index) {
-                const channel = this.channels[index];
-                if (!channel) return;
-
-                const key = channel.name + channel.url;
-                const isWorking = this.workingChannels.has(key);
-                const isFailed = this.failedChannels.has(key);
-
-                const li = this.channelList.querySelector(`[data-index="${index}"]`);
-                if (!li) return;
-
-                let statusText, statusClass;
-                if (isWorking) {
-                    statusText = 'En Vivo';
-                    statusClass = 'text-green-600';
-                } else if (isFailed) {
-                    statusText = 'Sin Señal - Click para reintentar';
-                    statusClass = 'text-red-500';
-                } else {
-                    statusText = 'Sin Probar';
-                    statusClass = 'text-yellow-600 bg-yellow-200 px-1';
-                }
-
-                li.innerHTML = `
-                    <div class="font-hand text-2xl text-gray-400 w-8 text-right group-hover:text-red-600">${String(index + 1).padStart(2, '0')}</div>
-                    <div class="flex-1 border-b border-gray-300 pb-1 border-dashed">
-                        <h3 class="font-serif font-bold text-gray-800 text-lg leading-none">${channel.name}</h3>
-                        <span class="text-xs font-ui uppercase tracking-wider ${statusClass}">${statusText}</span>
-                    </div>
-                    ${isWorking ? '<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>' : ''}
-                `;
-
-                li.classList.remove('scanning');
+                // Rebuild the entire list to maintain sorted order
+                this.buildChannelList();
+                this.updateActiveChannel();
             }
 
             selectChannel(index) {
