@@ -798,12 +798,17 @@
 
                 if (isFullscreen) {
                     // Exit fullscreen
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(e => console.log('Exit fullscreen error:', e));
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.mozCancelFullScreen) {
-                        document.mozCancelFullScreen();
+                    try {
+                        if (document.exitFullscreen) {
+                            const result = document.exitFullscreen();
+                            if (result && result.catch) result.catch(e => console.log('Exit fullscreen error:', e));
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.mozCancelFullScreen) {
+                            document.mozCancelFullScreen();
+                        }
+                    } catch (e) {
+                        console.log('Exit fullscreen error:', e);
                     }
                 } else {
                     // Enter fullscreen - try screen first, then video
@@ -814,16 +819,35 @@
                                      element.msRequestFullscreen;
 
                     if (requestFS) {
-                        requestFS.call(element).catch(err => {
-                            console.log('Fullscreen request failed on screen, trying video:', err);
-                            // Fallback to video element
-                            const videoFS = this.video.requestFullscreen ||
-                                           this.video.webkitRequestFullscreen ||
-                                           this.video.mozRequestFullScreen;
-                            if (videoFS) {
-                                videoFS.call(this.video).catch(e => console.log('Video fullscreen also failed:', e));
+                        try {
+                            const result = requestFS.call(element);
+                            // Handle Promise if returned (modern browsers)
+                            if (result && result.catch) {
+                                result.catch(err => {
+                                    console.log('Fullscreen request failed on screen, trying video:', err);
+                                    this.tryVideoFullscreen();
+                                });
                             }
-                        });
+                        } catch (err) {
+                            console.log('Fullscreen error:', err);
+                            this.tryVideoFullscreen();
+                        }
+                    }
+                }
+            }
+
+            tryVideoFullscreen() {
+                const videoFS = this.video.requestFullscreen ||
+                               this.video.webkitRequestFullscreen ||
+                               this.video.mozRequestFullScreen;
+                if (videoFS) {
+                    try {
+                        const result = videoFS.call(this.video);
+                        if (result && result.catch) {
+                            result.catch(e => console.log('Video fullscreen also failed:', e));
+                        }
+                    } catch (e) {
+                        console.log('Video fullscreen error:', e);
                     }
                 }
             }
@@ -834,9 +858,6 @@
             }
 
             getYouTubeVideoId(url) {
-                // Handle various YouTube URL formats
-                let videoId = null;
-
                 // youtube.com/watch?v=VIDEO_ID
                 const watchMatch = url.match(/[?&]v=([^&]+)/);
                 if (watchMatch) return watchMatch[1];
@@ -852,6 +873,23 @@
                 // youtube.com/live/VIDEO_ID
                 const liveMatch = url.match(/youtube\.com\/live\/([^?&]+)/);
                 if (liveMatch) return liveMatch[1];
+
+                return null;
+            }
+
+            // Get YouTube channel name for live streams
+            getYouTubeChannelName(url) {
+                // youtube.com/c/CHANNEL_NAME/live
+                const cMatch = url.match(/youtube\.com\/c\/([^\/]+)\/live/i);
+                if (cMatch) return cMatch[1];
+
+                // youtube.com/user/USERNAME/live
+                const userMatch = url.match(/youtube\.com\/user\/([^\/]+)\/live/i);
+                if (userMatch) return userMatch[1];
+
+                // youtube.com/@HANDLE/live
+                const handleMatch = url.match(/youtube\.com\/@([^\/]+)\/live/i);
+                if (handleMatch) return handleMatch[1];
 
                 return null;
             }
@@ -1228,9 +1266,30 @@
 
             playYouTube(url) {
                 const videoId = this.getYouTubeVideoId(url);
-                if (!videoId) {
-                    console.log('Could not extract YouTube video ID from:', url);
-                    this.handleChannelError();
+                const channelName = this.getYouTubeChannelName(url);
+
+                let embedUrl;
+                if (videoId) {
+                    // Direct video ID - use standard embed
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this.isMuted ? 1 : 0}&enablejsapi=1&rel=0`;
+                } else if (channelName) {
+                    // Channel live stream - use popout player (opens in iframe but may have restrictions)
+                    // Try embedding the channel's live page
+                    embedUrl = `https://www.youtube.com/embed/live_stream?channel=${channelName}&autoplay=1&mute=${this.isMuted ? 1 : 0}`;
+                    console.log('Using channel live embed for:', channelName);
+                } else {
+                    console.log('Could not extract YouTube video ID or channel from:', url);
+                    // Mark as failed and skip
+                    const ch = this.channels[this.currentChannel];
+                    if (ch) {
+                        const key = ch.name + ch.url;
+                        this.failedChannels.add(key);
+                        this.workingChannels.delete(key);
+                        this.saveChannelStatus();
+                        this.updateStatusDisplay();
+                        this.updateChannelListItem(this.currentChannel);
+                    }
+                    this.nextWorkingChannel();
                     return;
                 }
 
@@ -1241,11 +1300,9 @@
                 this.youtubePlayer.classList.remove('hidden');
                 this.isYouTubeChannel = true;
 
-                // Set YouTube embed URL with autoplay
-                const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this.isMuted ? 1 : 0}&enablejsapi=1&rel=0`;
                 this.youtubePlayer.src = embedUrl;
 
-                // Mark as working after a short delay (YouTube doesn't give us load events easily)
+                // Mark as working (YouTube doesn't give us load events easily)
                 this.loading.classList.add('hidden');
                 this.noSignal.classList.add('hidden');
 
