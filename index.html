@@ -1,1015 +1,409 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#75AADB">
-    <meta name="description" content="¡Vamos Argentina! Tu TV argentina favorita con todos los canales del país">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="theme-color" content="#5D4037">
+    <meta name="description" content="TeleArgentina de Adela - Tu TV argentina favorita con todos los canales del país">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tele Argentina">
+    <meta name="apple-mobile-web-app-title" content="TeleArgentina">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link rel="apple-touch-icon" href="icons/icon.svg">
-    <title>🇦🇷 ¡TELE ARGENTINA! 🇦🇷</title>
+    <title>TeleArgentina de Adela - Retro TV</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&amp;family=Caveat:wght@400;700&amp;family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Roboto+Condensed:wght@400;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        wood: {
+                            light: '#8D6E63',
+                            base: '#5D4037',
+                            dark: '#3E2723',
+                            grain: '#4E342E',
+                        },
+                        chrome: {
+                            light: '#F5F5F5',
+                            base: '#BDBDBD',
+                            dark: '#616161',
+                        },
+                        paper: {
+                            light: '#FFF8E1',
+                            lines: '#90CAF9',
+                        },
+                        primary: "#38bdf8",
+                        secondary: "#facc15",
+                        "tv-dark": "#0a0a0a",
+                    },
+                    fontFamily: {
+                        display: ["'Lobster'", "cursive"],
+                        hand: ["'Caveat'", "cursive"],
+                        serif: ["'Playfair Display'", "serif"],
+                        ui: ["'Roboto Condensed'", "sans-serif"],
+                    },
+                    boxShadow: {
+                        '3d': '0 4px 0px 0px rgba(0,0,0,0.3)',
+                        'inner-screen': 'inset 0 0 40px 10px rgba(0,0,0,0.8)',
+                        'knob': '2px 2px 5px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.3)',
+                        'polaroid': '3px 3px 10px rgba(0,0,0,0.3)',
+                    },
+                    backgroundImage: {
+                        'wood-pattern': "repeating-linear-gradient(45deg, #5D4037 0px, #5D4037 10px, #4E342E 10px, #4E342E 12px, #5D4037 12px, #5D4037 24px, #3E2723 24px, #3E2723 26px)",
+                        'chrome-gradient': "linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 50%, #616161 100%)",
+                        'brushed-metal': "repeating-linear-gradient(90deg, #ccc 0, #ccc 1px, #bbb 1px, #bbb 2px)",
+                        'wallpaper': "radial-gradient(#d7ccc8 15%, transparent 16%), radial-gradient(#d7ccc8 15%, transparent 16%)",
+                    }
+                },
+            },
+        };
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Roboto+Condensed:wght@700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .wood-texture {
+            background-color: #5D4037;
+            background-image:
+                repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px),
+                var(--tw-gradient-stops);
         }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Argentina sky blue gradient */
-            background: linear-gradient(180deg,
-                #75AADB 0%,
-                #ffffff 35%,
-                #ffffff 65%,
-                #75AADB 100%);
-            font-family: 'Roboto Condensed', 'Courier New', monospace;
-            overflow: hidden;
-            position: relative;
+        .wall-pattern {
+            background-color: #EFEBE9;
+            background-image: radial-gradient(#D7CCC8 2px, transparent 2px), radial-gradient(#D7CCC8 2px, transparent 2px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
-
-        /* Floating soccer balls background */
-        body::before {
-            content: '⚽ 🇦🇷 ⚽ 🏆 ⚽ 🇦🇷 ⚽ 🏆 ⚽ 🇦🇷 ⚽ 🏆';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            font-size: 40px;
-            opacity: 0.1;
-            animation: floatBg 30s linear infinite;
-            pointer-events: none;
-            white-space: nowrap;
-            line-height: 80px;
-            z-index: 0;
+        .channel-scroll::-webkit-scrollbar {
+            width: 6px;
         }
-
-        @keyframes floatBg {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        .channel-scroll::-webkit-scrollbar-track {
+            background: transparent;
         }
-
-        .room {
-            perspective: 1000px;
-            z-index: 1;
-        }
-
-        .tv-container {
-            position: relative;
-            transform: rotateX(2deg);
-        }
-
-        /* Main TV Cabinet - Argentina themed */
-        .tv {
-            position: relative;
-            width: 720px;
-            height: 600px;
-            background: linear-gradient(145deg, #75AADB 0%, #4a8bc2 50%, #3a7bb2 100%);
-            border-radius: 25px;
-            padding: 30px;
-            box-shadow:
-                0 20px 60px rgba(0,0,0,0.4),
-                inset 0 2px 4px rgba(255,255,255,0.3),
-                inset 0 -2px 4px rgba(0,0,0,0.2),
-                0 0 0 8px #ffffff,
-                0 0 0 12px #75AADB;
-        }
-
-        /* Sun of May pattern */
-        .tv::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 25px;
-            background:
-                radial-gradient(circle at 85% 15%, rgba(255,215,0,0.15) 0%, transparent 25%),
-                repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 10px,
-                    rgba(255,255,255,0.03) 10px,
-                    rgba(255,255,255,0.03) 20px
-                );
-            pointer-events: none;
-        }
-
-        /* Screen bezel */
-        .screen-container {
-            position: relative;
-            width: 480px;
-            height: 360px;
-            background: #1a1a1a;
-            border-radius: 20px;
-            padding: 15px;
-            margin-left: 20px;
-            box-shadow:
-                inset 0 0 50px rgba(0,0,0,0.8),
-                0 0 0 8px #2d2d2d,
-                0 0 0 12px #ffd700;
-        }
-
-        /* CRT screen effect */
-        .screen {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #000;
+        .channel-scroll::-webkit-scrollbar-thumb {
+            background: #BCAAA4;
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: inset 0 0 100px rgba(117,170,219,0.2);
         }
-
-        .screen::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                repeating-linear-gradient(
-                    0deg,
-                    rgba(0,0,0,0.15),
-                    rgba(0,0,0,0.15) 1px,
-                    transparent 1px,
-                    transparent 2px
-                );
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            5% { opacity: 0.95; }
+            10% { opacity: 0.9; }
+            15% { opacity: 0.95; }
+            20% { opacity: 0.98; }
+            50% { opacity: 0.95; }
+            80% { opacity: 0.9; }
+            100% { opacity: 0.97; }
+        }
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
             pointer-events: none;
-            z-index: 10;
+        }
+        .polaroid-wrapper {
+            transition: transform 0.3s ease;
+        }
+        .polaroid-wrapper:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 50;
+        }
+        .metal-knob {
+            background: conic-gradient(#d7d7d7, #ffffff, #d7d7d7, #999999, #d7d7d7);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(255,255,255,0.2);
+        }
+        .gold-leaf {
+            background: linear-gradient(to bottom, #cfc09f 22%,#ffecb3 24%,#3a2c0f 26%,#3a2c0f 27%,#ffecb3 40%,#997f43 78%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 1px 0px rgba(255,255,255,0.3);
         }
 
-        .screen::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 80%);
-            pointer-events: none;
-            z-index: 11;
-        }
-
+        /* Video player styles */
         #video-player {
             width: 100%;
             height: 100%;
             object-fit: contain;
             background: #000;
-            cursor: pointer;
         }
 
-        /* Fullscreen styles */
         .screen:fullscreen,
         .screen:-webkit-full-screen {
             background: #000;
             width: 100vw;
             height: 100vh;
+            border-radius: 0;
         }
 
         .screen:fullscreen #video-player,
         .screen:-webkit-full-screen #video-player {
             width: 100vw;
             height: 100vh;
-            object-fit: contain;
         }
 
-        .screen:fullscreen::before,
-        .screen:fullscreen::after,
-        .screen:-webkit-full-screen::before,
-        .screen:-webkit-full-screen::after {
+        .screen:fullscreen .crt-overlay,
+        .screen:-webkit-full-screen .crt-overlay {
             display: none;
         }
 
-        /* Static noise effect */
-        .static {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            z-index: 5;
-            pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        /* Channel list item states */
+        .channel-item {
+            transition: all 0.2s ease;
         }
-
-        .static.active {
-            opacity: 0.4;
-            animation: staticFlicker 0.1s infinite;
+        .channel-item:hover {
+            transform: translateX(4px);
         }
-
-        @keyframes staticFlicker {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.2; }
+        .channel-item.active {
+            background: rgba(254, 243, 199, 0.9) !important;
+            transform: rotate(-1deg);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
         }
-
-        /* Channel display */
-        .channel-display {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(117,170,219,0.9);
-            color: #ffffff;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 24px;
-            font-family: 'Bangers', 'Courier New', monospace;
-            z-index: 20;
-            text-shadow: 2px 2px 0 #3a7bb2;
-            opacity: 0;
-            transition: opacity 0.3s;
-            border: 2px solid #ffd700;
+        .channel-item.scanning {
+            animation: pulse 1s infinite;
         }
-
-        .channel-display.visible {
-            opacity: 1;
-        }
-
-        /* Control panel */
-        .control-panel {
-            position: absolute;
-            right: 25px;
-            top: 50px;
-            width: 120px;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        /* Speaker grille - Argentina stripes */
-        .speaker {
-            width: 100px;
-            height: 80px;
-            background: linear-gradient(180deg, #75AADB 0%, #75AADB 33%, #fff 33%, #fff 66%, #75AADB 66%, #75AADB 100%);
-            border-radius: 10px;
-            position: relative;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
-            border: 3px solid #ffd700;
-        }
-
-        .speaker::before {
-            content: '🇦🇷';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 30px;
-        }
-
-        /* Knob styles */
-        .knob-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .knob-label {
-            color: #ffd700;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
-            font-weight: bold;
-        }
-
-        .knob {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(145deg, #ffd700, #b8860b);
-            border-radius: 50%;
-            position: relative;
-            cursor: pointer;
-            box-shadow:
-                0 4px 15px rgba(0,0,0,0.4),
-                inset 0 2px 4px rgba(255,255,255,0.4);
-            transition: transform 0.1s;
-            border: 3px solid #ffffff;
-        }
-
-        .knob:active {
-            transform: scale(0.95);
-        }
-
-        .knob::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 8px;
-            height: 25px;
-            background: linear-gradient(90deg, #333, #555, #333);
-            transform-origin: center bottom;
-            transform: translate(-50%, -100%);
-            border-radius: 4px;
-        }
-
-        .knob::after {
-            content: '⚽';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            font-size: 16px;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Channel knob specific */
-        #channel-knob::before {
-            transform: translate(-50%, -100%) rotate(var(--rotation, 0deg));
-        }
-
-        /* Volume knob specific */
-        #volume-knob::before {
-            transform: translate(-50%, -100%) rotate(var(--rotation, -90deg));
-        }
-
-        /* Power button */
-        .power-btn {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(145deg, #333, #1a1a1a);
-            border-radius: 50%;
-            border: 3px solid #ffd700;
-            cursor: pointer;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            transition: all 0.2s;
-        }
-
-        .power-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 14px;
-            height: 14px;
-            border: 3px solid #666;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .power-btn::after {
-            content: '';
-            position: absolute;
-            top: 6px;
-            left: 50%;
-            width: 3px;
-            height: 12px;
-            background: #666;
-            transform: translateX(-50%);
-        }
-
-        .power-btn.on::before,
-        .power-btn.on::after {
-            border-color: #75AADB;
-            background: #75AADB;
-            box-shadow: 0 0 10px #75AADB;
-        }
-
-        .power-btn.on::before {
-            background: transparent;
-        }
-
-        /* Power indicator LED */
-        .power-led {
-            width: 12px;
-            height: 12px;
-            background: #333;
-            border-radius: 50%;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-        }
-
-        .power-led.on {
-            background: #75AADB;
-            box-shadow: 0 0 10px #75AADB, 0 0 20px #75AADB;
-        }
-
-        /* TV legs */
-        .tv-legs {
-            display: flex;
-            justify-content: center;
-            gap: 300px;
-            margin-top: -5px;
-        }
-
-        .leg {
-            width: 35px;
-            height: 50px;
-            background: linear-gradient(90deg, #75AADB 0%, #4a8bc2 50%, #75AADB 100%);
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            border: 3px solid #ffffff;
-            border-top: none;
-        }
-
-        /* Channel info overlay */
-        .channel-info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, rgba(117,170,219,0.95), rgba(58,123,178,0.95));
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 20;
-            opacity: 0;
-            transition: opacity 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border: 2px solid #ffd700;
-        }
-
-        .channel-info.visible {
-            opacity: 1;
-        }
-
-        .channel-info img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            background: white;
-            border-radius: 5px;
-            padding: 5px;
-        }
-
-        .channel-info .info {
-            flex: 1;
-        }
-
-        .channel-info .name {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-family: 'Bangers', sans-serif;
-            letter-spacing: 1px;
-        }
-
-        .channel-info .group {
-            font-size: 12px;
-            color: #ffd700;
-        }
-
-        /* Loading spinner */
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 15;
-            display: none;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .loading::after {
-            content: '⚽';
-            display: block;
-            width: 50px;
-            height: 50px;
-            font-size: 40px;
-            animation: spinBall 0.5s linear infinite;
-        }
-
-        @keyframes spinBall {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Error message */
-        .error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ff6b6b;
-            text-align: center;
-            z-index: 15;
-            display: none;
-            padding: 20px;
-            font-family: 'Bangers', sans-serif;
-        }
-
-        .error-message.active {
-            display: block;
-        }
-
-        /* Antenna - Argentinian themed */
-        .antenna {
-            position: absolute;
-            top: -80px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 60px;
-        }
-
-        .antenna-rod {
-            width: 6px;
-            height: 100px;
-            background: linear-gradient(90deg, #ffd700, #ffed4a, #ffd700);
-            border-radius: 3px;
-            transform-origin: bottom center;
-        }
-
-        .antenna-rod:first-child {
-            transform: rotate(-20deg);
-        }
-
-        .antenna-rod:last-child {
-            transform: rotate(20deg);
-        }
-
-        .antenna-base {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 35px;
-            height: 20px;
-            background: linear-gradient(180deg, #ffd700, #b8860b);
-            border-radius: 5px 5px 0 0;
-        }
-
-        /* Sun of May decoration on antenna */
-        .antenna::after {
-            content: '☀️';
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 30px;
-            animation: sunPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes sunPulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.1); }
-        }
-
-        /* Brand plate */
-        .brand {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(180deg, #ffd700, #b8860b);
-            padding: 8px 25px;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #1a1a1a;
-            letter-spacing: 2px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            font-family: 'Bangers', sans-serif;
-            border: 2px solid #ffffff;
-        }
-
-        /* Instructions */
-        .instructions {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #3a7bb2;
-            font-size: 11px;
-            text-align: center;
-            background: rgba(255,255,255,0.9);
-            padding: 8px 20px;
-            border-radius: 20px;
-            border: 2px solid #75AADB;
-        }
-
-        .instructions kbd {
-            background: #75AADB;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin: 0 3px;
-            font-weight: bold;
-        }
-
-        /* Channel Panel - Argentina style */
-        .channel-panel {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(180deg, #75AADB 0%, #4a8bc2 100%);
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-            border: 4px solid #ffd700;
-            width: 220px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .panel-header {
-            text-align: center;
-            color: white;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .panel-title {
-            font-family: 'Bangers', sans-serif;
-            font-size: 20px;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-        }
-
-        .panel-subtitle {
-            font-size: 10px;
-            color: #ffd700;
-            margin-top: 5px;
-        }
-
-        .panel-status {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 8px;
-            font-size: 11px;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .status-dot.active { background: #4ade80; box-shadow: 0 0 5px #4ade80; }
-        .status-dot.inactive { background: #666; }
-        .status-dot.scanning { background: #ffd700; animation: pulse 0.5s infinite; }
-
-        /* Channel buttons container */
-        .channel-list {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding-right: 5px;
-        }
-
-        .channel-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .channel-list::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.2);
-            border-radius: 3px;
-        }
-
-        .channel-list::-webkit-scrollbar-thumb {
-            background: #ffd700;
-            border-radius: 3px;
-        }
-
-        /* Individual channel button */
-        .channel-btn {
-            background: linear-gradient(180deg, #ffffff 0%, #e8e8e8 100%);
-            border: 2px solid #75AADB;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .channel-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border-color: #ffd700;
-        }
-
-        .channel-btn:active {
-            transform: scale(0.98);
-        }
-
-        .channel-btn.active {
-            background: linear-gradient(180deg, #75AADB 0%, #4a8bc2 100%);
-            color: white;
-            border-color: #ffd700;
-            box-shadow: 0 0 15px rgba(117,170,219,0.5);
-        }
-
-        .channel-btn.active .channel-btn-name {
-            color: white;
-        }
-
-        .channel-btn.inactive {
-            opacity: 0.4;
-            pointer-events: none;
-            background: #ccc;
-        }
-
-        .channel-btn.scanning {
-            border-color: #ffd700;
-            animation: scanPulse 1s infinite;
-        }
-
-        @keyframes scanPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.5); }
-            50% { box-shadow: 0 0 10px 3px rgba(255,215,0,0.5); }
-        }
-
-        .channel-btn-logo {
-            width: 35px;
-            height: 35px;
-            object-fit: contain;
-            background: white;
-            border-radius: 5px;
-            padding: 3px;
-            flex-shrink: 0;
-        }
-
-        .channel-btn-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .channel-btn-name {
-            font-size: 11px;
-            font-weight: bold;
-            color: #333;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .channel-btn-status {
-            font-size: 9px;
-            color: #666;
-            margin-top: 2px;
-        }
-
-        .channel-btn.active .channel-btn-status {
-            color: #ffd700;
-        }
-
-        .channel-btn-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .channel-btn-indicator.online {
-            background: #4ade80;
-            box-shadow: 0 0 8px #4ade80;
-        }
-
-        .channel-btn-indicator.offline {
-            background: #666;
-        }
-
-        .channel-btn-indicator.unknown {
-            background: #ffd700;
-        }
-
-        /* Scan button */
-        .scan-controls {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .scan-btn {
-            width: 100%;
-            background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-family: 'Bangers', sans-serif;
-            font-size: 16px;
-            letter-spacing: 2px;
-            color: #1a1a1a;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .scan-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(255,215,0,0.4);
-        }
-
-        .scan-btn:active {
-            transform: scale(0.98);
-        }
-
-        .scan-btn.scanning {
-            animation: pulse 0.5s infinite;
-        }
-
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
         }
 
-        /* No channels message */
-        .no-channels {
-            text-align: center;
-            color: white;
-            padding: 30px 15px;
-            font-style: italic;
+        /* Loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-
-        .no-channels-icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-        }
-
-        /* Chunky buttons on TV */
-        .tv-btn {
-            position: absolute;
-            bottom: 45px;
-            height: 35px;
-            background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
-            border: 3px solid #ffffff;
-            border-radius: 8px;
-            color: #1a1a1a;
-            font-family: 'Bangers', sans-serif;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow:
-                0 4px 0 #8b6914,
-                0 6px 10px rgba(0,0,0,0.3);
-            transition: all 0.1s;
-        }
-
-        .tv-btn:hover {
-            box-shadow:
-                0 4px 0 #8b6914,
-                0 6px 15px rgba(255,215,0,0.4);
-        }
-
-        .tv-btn:active {
-            transform: translateY(3px);
-            box-shadow:
-                0 1px 0 #8b6914,
-                0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        #fullscreen-btn {
-            left: 25px;
-            width: 100px;
-        }
-
-        #mute-btn {
-            right: 25px;
-            width: 80px;
-        }
-
-        /* Fun footer */
-        .footer-text {
-            position: fixed;
-            bottom: 50px;
-            left: 20px;
-            font-family: 'Bangers', sans-serif;
-            font-size: 14px;
-            color: #3a7bb2;
-            animation: bounce 2s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
-<body>
-    <div class="footer-text">🇦🇷 ¡Dale campeón! 🏆</div>
+<body class="wall-pattern min-h-screen flex items-center justify-center p-4 transition-colors duration-300 font-ui overflow-hidden relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-orange-100/20 to-black/40 pointer-events-none z-0"></div>
 
-    <div class="room">
-        <div class="tv-container">
-            <div class="antenna">
-                <div class="antenna-rod"></div>
-                <div class="antenna-base"></div>
-                <div class="antenna-rod"></div>
+    <div class="absolute top-8 left-8 flex flex-col gap-1 opacity-80 pointer-events-none z-0">
+        <h1 class="font-display text-4xl text-wood-dark drop-shadow-md -rotate-2">TeleArgentina de Adela</h1>
+        <p class="font-hand text-2xl text-wood-light ml-4">Para mi nieto querido ❤️</p>
+    </div>
+
+    <main class="flex flex-col lg:flex-row gap-12 items-center justify-center w-full max-w-7xl z-10 scale-90 lg:scale-100 relative">
+        <!-- Left polaroid -->
+        <div class="absolute -top-32 left-0 z-10 transform -rotate-[5deg] polaroid-wrapper hover:z-50">
+            <div class="bg-white p-2 pb-6 shadow-polaroid w-52 rotate-3 border border-gray-200">
+                <div class="bg-gray-200 h-36 w-full overflow-hidden grayscale-[10%] sepia-[20%] hover:grayscale-0 hover:sepia-0 transition-all relative">
+                    <img alt="Familia reunida" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAos2BPtL4p1SMI-sf41OPaBGQ2UfWyGllqPAMv0Tzh_ns38TWXufE2h2hJyEXVTMyhiW1nu19OnuzEMjWmrk9oGVtVv8qjTFcmx7hjs2DeqOUg0pwdym-TE8OPeawNldpa21V8CjCJ4dGdbaowcP_EFfDP4tKe1UiTPqBOcm-dTADFwO3f2P6EYnz3a-00Kr7364YFIjTUq3-bN6TrgjHPNnqoJnmSi0UAO34RcklrXw3C0Oqs_WBJUzR5pgbCbU99w4sF5lznuQ"/>
+                    <div class="absolute inset-0 bg-yellow-900/10 mix-blend-multiply pointer-events-none"></div>
+                </div>
+                <p class="font-hand text-gray-700 text-center mt-2 text-lg leading-none transform -rotate-1">Domingo en familia</p>
+            </div>
+            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-red-800 rounded-full shadow-md z-20 border-2 border-red-900"></div>
+        </div>
+
+        <div class="absolute -top-20 -left-12 z-20 transform -rotate-12 polaroid-wrapper hidden lg:block opacity-60 hover:opacity-100 transition-opacity">
+            <div class="bg-white p-3 pb-8 shadow-polaroid w-40 rotate-3">
+                <div class="bg-gray-200 h-28 w-full overflow-hidden grayscale-[30%] hover:grayscale-0 transition-all">
+                    <img alt="Familia en la calle" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGHO4eNsk6hFrGRDAMFylsx8SDrSUa8Of725XoAnkq3VF8Yk7RDp4bO3ih1aGpf0EH88gtvleXF0sfORMSuz0muNb5uLav6pNrWIAx52NqUehiFUZ8Aj-Vv4z_3GUow0Bkzx0gOC8uS0om9JKQUZQ6oeVOPRmxQW-z_sDZFihRn-1i5w8ZkYFW-0GhbQ3Klh5tuJJboBKINO22f4uXlOQ9gdMRuhMwyyIcaDnoDu89vbYPi7FTzw14D4wuqVrwu7t5eRmyamZj6g"/>
+                </div>
+                <p class="font-hand text-gray-600 text-center mt-2 text-lg leading-none">Los chicos</p>
+            </div>
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-12 bg-white/40 rotate-45 backdrop-blur-sm border-l border-white/60 shadow-sm"></div>
+        </div>
+
+        <!-- TV Set -->
+        <div class="relative group">
+            <!-- Antenna -->
+            <div class="absolute -top-24 left-1/2 transform -translate-x-1/2 w-64 h-32 flex justify-between items-end z-0">
+                <div class="w-1.5 h-32 bg-gradient-to-t from-gray-400 to-gray-200 rounded-full transform -rotate-[35deg] origin-bottom shadow-lg border border-gray-500">
+                    <div class="w-3 h-3 bg-red-500 rounded-full absolute -top-1 -left-1 shadow-sm"></div>
+                </div>
+                <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+                    <div class="relative w-16 h-16 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-yellow-500/80 text-7xl drop-shadow-lg animate-pulse" style="font-variation-settings: 'FILL' 1;">sunny</span>
+                    </div>
+                </div>
+                <div class="w-1.5 h-32 bg-gradient-to-t from-gray-400 to-gray-200 rounded-full transform rotate-[35deg] origin-bottom shadow-lg border border-gray-500"></div>
             </div>
 
-            <div class="tv">
-                <div class="screen-container">
-                    <div class="screen">
-                        <video id="video-player" playsinline></video>
-                        <div class="static" id="static"></div>
-                        <div class="channel-display" id="channel-display">CH 01</div>
-                        <div class="loading" id="loading"></div>
-                        <div class="error-message" id="error-message">
-                            <div>📡 Sin Señal</div>
-                            <div style="font-size: 14px; margin-top: 10px;">¡Probá otro canal, che!</div>
+            <!-- TV Feet -->
+            <div class="absolute -bottom-4 left-16 w-8 h-8 bg-wood-dark rounded-full shadow-lg"></div>
+            <div class="absolute -bottom-4 right-16 w-8 h-8 bg-wood-dark rounded-full shadow-lg"></div>
+
+            <!-- TV Cabinet -->
+            <div class="relative bg-gradient-to-br from-wood-base via-wood-grain to-wood-dark w-[720px] h-[520px] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col items-center p-8 box-border border-r-[8px] border-b-[8px] border-wood-dark border-t-[2px] border-l-[2px] border-wood-light">
+                <div class="absolute inset-0 opacity-30 bg-wood-pattern pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute inset-4 rounded-[1.5rem] border-4 border-gray-300/50 pointer-events-none z-10 shadow-inner"></div>
+
+                <!-- Small polaroid on TV -->
+                <div class="absolute top-6 right-[140px] z-30 transform rotate-[8deg] polaroid-wrapper">
+                    <div class="bg-white p-1 pb-4 shadow-md w-32 border border-gray-300">
+                        <div class="bg-gray-200 h-24 w-full overflow-hidden grayscale-[15%] contrast-125 sepia-[15%] hover:grayscale-0 hover:sepia-0 transition-all relative">
+                            <img alt="Mirando algo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7xOjTCG9hZTX7tlXNCMJlkDUhj9jxz0cwLIqR8E6Vfv64jE8zo26XFKfhRBVH8oRAwlZwgZ18JEFdw36rdU-o2uK_jDh-nEeczuyObcNG4nTkcb7A9tjkXL2qMN9XXtTzeIWZqpMw0v6uM_EPcjCejhiDTpeP1VmJ0sHk0nWrmniOnpx-MdJicx31BCo-RoQSr0dpnVSXAqj39mW18_2iXb2Y3FL28NhFGJX038O2pg7-Y7u_aFgHE4v-jjW7h6vZ6LIrZ2JTNQ"/>
+                            <div class="absolute inset-0 bg-orange-500/10 mix-blend-screen pointer-events-none"></div>
                         </div>
-                        <div class="channel-info" id="channel-info">
-                            <img id="channel-logo" src="" alt="">
-                            <div class="info">
-                                <div class="name" id="channel-name"></div>
-                                <div class="group" id="channel-group">🇦🇷 Argentina</div>
+                        <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-10 bg-yellow-200/60 rotate-90 backdrop-blur-sm shadow-sm border border-yellow-100"></div>
+                    </div>
+                </div>
+
+                <div class="w-full h-full flex gap-6 z-20 items-center">
+                    <!-- Screen -->
+                    <div id="screen" class="screen flex-1 h-[360px] bg-black rounded-[2rem] border-[12px] border-gray-800 shadow-inner-screen relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-shadow duration-500 ring-4 ring-gray-400/30 cursor-pointer">
+                        <!-- Video Player -->
+                        <video id="video-player" playsinline></video>
+
+                        <!-- No signal state -->
+                        <div id="no-signal" class="absolute inset-0 bg-gray-900 flex items-center justify-center">
+                            <div class="text-center opacity-40">
+                                <span class="material-symbols-outlined text-6xl text-white mb-2 animate-pulse">tv_off</span>
+                                <p class="text-white font-ui tracking-widest text-sm opacity-70">SIN SEÑAL</p>
                             </div>
                         </div>
+
+                        <!-- Loading state -->
+                        <div id="loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center hidden">
+                            <div class="text-center">
+                                <span class="material-symbols-outlined text-6xl text-yellow-500 loading-spinner">sports_soccer</span>
+                                <p class="text-white font-ui tracking-widest text-sm mt-2">SINTONIZANDO...</p>
+                            </div>
+                        </div>
+
+                        <!-- Channel info overlay -->
+                        <div id="channel-info" class="absolute bottom-4 left-4 right-4 bg-black/80 rounded-lg p-3 flex items-center gap-3 opacity-0 transition-opacity pointer-events-none">
+                            <img id="channel-logo" src="" alt="" class="w-12 h-12 object-contain bg-white rounded p-1 hidden">
+                            <div class="flex-1">
+                                <p id="channel-name" class="text-white font-bold text-lg"></p>
+                                <p class="text-yellow-500 text-sm font-ui">🇦🇷 Argentina</p>
+                            </div>
+                        </div>
+
+                        <!-- CRT effects overlay -->
+                        <div class="crt-overlay absolute top-0 right-0 w-full h-2/3 bg-gradient-to-b from-white/10 to-transparent rounded-t-[1.5rem] pointer-events-none"></div>
+                        <div class="crt-overlay absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 background-size-[100%_2px,3px_100%] pointer-events-none opacity-50"></div>
+                    </div>
+
+                    <!-- Control Panel -->
+                    <div class="w-32 h-[360px] bg-gradient-to-b from-neutral-200 to-neutral-400 rounded-xl border border-neutral-500 shadow-inner flex flex-col items-center justify-between py-4 px-2 relative">
+                        <!-- Corner screws -->
+                        <div class="absolute top-2 left-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center"><div class="w-full h-[1px] bg-gray-600 rotate-45"></div></div>
+                        <div class="absolute top-2 right-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center"><div class="w-full h-[1px] bg-gray-600 rotate-45"></div></div>
+                        <div class="absolute bottom-2 left-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center"><div class="w-full h-[1px] bg-gray-600 rotate-45"></div></div>
+                        <div class="absolute bottom-2 right-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center"><div class="w-full h-[1px] bg-gray-600 rotate-45"></div></div>
+
+                        <!-- Argentina Flag -->
+                        <div class="w-20 h-12 bg-sky-200 border-2 border-yellow-500 rounded shadow-md flex items-center justify-center mb-2 overflow-hidden relative">
+                            <div class="absolute inset-x-0 top-0 h-1/3 bg-sky-400"></div>
+                            <div class="absolute inset-x-0 bottom-0 h-1/3 bg-sky-400"></div>
+                            <div class="z-10 bg-yellow-400 rounded-full w-4 h-4 shadow-sm"></div>
+                        </div>
+
+                        <!-- Channel Knob -->
+                        <div class="flex flex-col items-center gap-1">
+                            <div id="channel-knob" class="w-16 h-16 rounded-full metal-knob flex items-center justify-center cursor-pointer active:rotate-12 transition-transform shadow-lg relative border-4 border-gray-300">
+                                <div class="absolute top-1 w-1 h-3 bg-red-500 rounded" style="transform: rotate(var(--rotation, 0deg)); transform-origin: center 24px;"></div>
+                                <span class="material-symbols-outlined text-gray-600 text-2xl font-bold">sports_soccer</span>
+                            </div>
+                            <span class="text-[10px] font-ui text-black font-bold uppercase tracking-widest bg-gray-200 px-1 rounded border border-gray-400 shadow-sm">Canal</span>
+                        </div>
+
+                        <!-- Volume Knob -->
+                        <div class="flex flex-col items-center gap-1">
+                            <div id="volume-knob" class="w-16 h-16 rounded-full metal-knob flex items-center justify-center cursor-pointer active:rotate-12 transition-transform shadow-lg border-4 border-gray-300 relative">
+                                <div class="absolute top-1 w-1 h-3 bg-black rounded" style="transform: rotate(var(--rotation, -90deg)); transform-origin: center 24px;"></div>
+                                <span class="material-symbols-outlined text-gray-600 text-2xl">volume_up</span>
+                            </div>
+                            <span class="text-[10px] font-ui text-black font-bold uppercase tracking-widest bg-gray-200 px-1 rounded border border-gray-400 shadow-sm">Audio</span>
+                        </div>
+
+                        <!-- Power Button -->
+                        <div class="mt-auto">
+                            <button id="power-btn" class="w-12 h-12 rounded bg-black border-b-4 border-r-4 border-gray-800 shadow-lg flex items-center justify-center group active:scale-95 active:border-0 transition-all active:translate-y-1">
+                                <span class="material-symbols-outlined text-red-500 text-xl group-hover:text-red-400 transition-colors">power_settings_new</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="control-panel">
-                    <div class="speaker"></div>
-
-                    <div class="knob-container">
-                        <div class="knob" id="channel-knob" title="Canal"></div>
-                        <div class="knob-label">Canal</div>
+                <!-- Bottom buttons -->
+                <div class="w-full flex items-center justify-between px-12 mt-4 z-20">
+                    <button id="fullscreen-btn" class="bg-wood-light hover:bg-wood-light/80 text-cream-100 border-2 border-wood-dark px-3 py-1 rounded shadow-md font-ui text-xs uppercase flex items-center gap-1 text-white">
+                        <span class="material-symbols-outlined text-sm">fullscreen</span>
+                        Pantalla
+                    </button>
+                    <div class="bg-gradient-to-r from-gray-800 via-black to-gray-800 px-6 py-2 rounded border-2 border-gray-400 shadow-lg flex items-center gap-3">
+                        <div class="w-full h-[1px] bg-gray-600"></div>
+                        <span class="font-display text-yellow-500 text-2xl tracking-wide whitespace-nowrap gold-leaf">TeleArgentina</span>
+                        <div class="w-full h-[1px] bg-gray-600"></div>
                     </div>
+                    <button id="mute-btn" class="bg-wood-light hover:bg-wood-light/80 text-cream-100 border-2 border-wood-dark px-3 py-1 rounded shadow-md font-ui text-xs uppercase flex items-center gap-1 text-white">
+                        <span class="material-symbols-outlined text-sm" id="mute-icon">volume_up</span>
+                        Sonido
+                    </button>
+                </div>
+            </div>
 
-                    <div class="knob-container">
-                        <div class="knob" id="volume-knob" title="Volumen"></div>
-                        <div class="knob-label">Volumen</div>
+            <!-- Bottom right polaroid -->
+            <div class="absolute -bottom-8 -right-16 z-30 transform rotate-6 polaroid-wrapper">
+                <div class="bg-white p-3 pb-8 shadow-polaroid w-40 -rotate-6">
+                    <div class="bg-gray-200 h-32 w-full overflow-hidden grayscale-[20%] hover:grayscale-0 transition-all">
+                        <img alt="Abuela Adela" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqM4sPJFlPvvMzifyYrGnbHoJnlgtCVZOydqJMyg4dAwD-7QQ1wPHAQbJdNgt23u_mM2Jc-K12FG9IRFzGcOcAMLLuvK_ew0QmR08wfwYip81Qcom89vg3rD1vNWVQp_xwCe6vsvCHNcM8Vmt9efau5IVRgZOBvePFVlQnA89gECDK0MOD9yw3C2EUAm65I_CzqCLGhSKKTHlfRrw0BXRbZeBcWF30ulRaQ_jS-YCqrsj28w3P-MBwoFDGmVnqr1xIviGgCpaXCw"/>
                     </div>
-
-                    <div class="power-led" id="power-led"></div>
-                    <div class="power-btn" id="power-btn" title="Encender"></div>
-                </div>
-
-                <div class="brand">🇦🇷 TELE ARGENTINA 🇦🇷</div>
-                <button class="tv-btn" id="fullscreen-btn" title="Pantalla Completa">📺 FULLSCREEN</button>
-                <button class="tv-btn" id="mute-btn" title="Silenciar">🔊 AUDIO</button>
-            </div>
-
-            <div class="tv-legs">
-                <div class="leg"></div>
-                <div class="leg"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Channel Panel -->
-    <div class="channel-panel" id="channel-panel">
-        <div class="panel-header">
-            <div class="panel-title">🇦🇷 CANALES 🇦🇷</div>
-            <div class="panel-subtitle">Televisión Argentina</div>
-            <div class="panel-status">
-                <div class="status-item">
-                    <div class="status-dot active" id="status-active"></div>
-                    <span id="active-count">0</span> Activos
-                </div>
-                <div class="status-item">
-                    <div class="status-dot inactive"></div>
-                    <span id="inactive-count">0</span> Inactivos
+                    <p class="font-hand text-gray-600 text-center mt-2 text-lg leading-none">¡Mirá!</p>
                 </div>
             </div>
         </div>
-        <div class="channel-list" id="channel-list">
-            <div class="no-channels">
-                <div class="no-channels-icon">⚽</div>
-                <div>Cargando canales...</div>
-            </div>
-        </div>
-        <div class="scan-controls">
-            <button class="scan-btn" id="scan-btn">🔍 ESCANEAR CANALES</button>
-        </div>
-    </div>
 
-    <div class="instructions">
-        <kbd>←</kbd> <kbd>→</kbd> Canal &nbsp;
-        <kbd>↑</kbd> <kbd>↓</kbd> Volumen &nbsp;
-        <kbd>Space</kbd> Power &nbsp;
-        <kbd>F</kbd> Pantalla Completa &nbsp;
-        <kbd>M</kbd> Silenciar
-    </div>
+        <!-- Channel Guide Notebook -->
+        <aside class="w-[320px] h-[550px] bg-paper-light relative shadow-2xl flex flex-col overflow-hidden transform rotate-1 border-l border-gray-300">
+            <!-- Spiral binding -->
+            <div class="absolute top-0 left-0 bottom-0 w-8 bg-neutral-800 z-20 flex flex-col items-center py-4 gap-3 shadow-2xl">
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+            </div>
+
+            <!-- Notebook content -->
+            <div class="pl-10 pr-4 py-6 h-full flex flex-col bg-[linear-gradient(transparent_23px,#90CAF9_24px)] bg-[length:100%_24px]">
+                <div class="text-center mb-4 rotate-1 border-b-2 border-red-800/20 pb-2">
+                    <h2 class="font-serif italic text-3xl text-red-900">Guía de Canales</h2>
+                    <p class="font-hand text-gray-500 text-xl">Buenos Aires, Argentina</p>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex justify-center gap-4 text-xs font-bold text-gray-600 mb-4 font-ui uppercase tracking-widest">
+                    <span class="flex items-center gap-1"><div class="w-2 h-2 bg-green-600 rounded-full"></div> <span id="active-count">0</span> En Vivo</span>
+                    <span class="flex items-center gap-1"><div class="w-2 h-2 bg-red-400 rounded-full"></div> <span id="inactive-count">0</span> Cortado</span>
+                </div>
+
+                <!-- Channel list -->
+                <ul id="channel-list" class="flex-1 overflow-y-auto pr-2 space-y-2 channel-scroll">
+                    <li class="text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-gray-400 loading-spinner">sports_soccer</span>
+                        <p class="font-hand text-gray-500 text-xl mt-2">Cargando canales...</p>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Sticky note -->
+            <div class="absolute bottom-12 right-6 bg-yellow-200 w-32 p-3 shadow-lg rotate-3 text-center transform hover:scale-110 transition-transform z-30">
+                <div class="w-8 h-2 bg-yellow-400/50 absolute -top-1 left-1/2 -translate-x-1/2 rotate-2"></div>
+                <p class="font-hand text-gray-800 text-lg leading-tight">No olvidarse de apagar la tele nene!</p>
+            </div>
+
+            <!-- Scan button -->
+            <div class="p-4 bg-transparent border-t border-gray-300 mt-auto ml-8">
+                <button id="scan-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-ui uppercase tracking-widest py-2 rounded shadow-md border-b-4 border-red-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 text-sm">
+                    <span class="w-2 h-2 bg-white rounded-full" id="scan-indicator"></span>
+                    <span id="scan-btn-text">Escanear Canales</span>
+                </button>
+            </div>
+        </aside>
+    </main>
 
     <script>
-        // Argentina TV App - ¡Vamos Argentina!
+        // TeleArgentina de Adela - Argentina TV App
         class TeleArgentina {
             constructor() {
                 this.channels = [];
@@ -1018,8 +412,7 @@
                 this.isMuted = false;
                 this.isPoweredOn = false;
                 this.hls = null;
-                this.channelDisplayTimeout = null;
-                this.infoDisplayTimeout = null;
+                this.channelInfoTimeout = null;
                 this.loadTimeout = null;
 
                 // Background scanning
@@ -1035,24 +428,22 @@
 
                 // DOM Elements
                 this.video = document.getElementById('video-player');
-                this.staticEl = document.getElementById('static');
-                this.channelDisplay = document.getElementById('channel-display');
+                this.noSignal = document.getElementById('no-signal');
+                this.loading = document.getElementById('loading');
                 this.channelInfo = document.getElementById('channel-info');
                 this.channelLogo = document.getElementById('channel-logo');
-                this.channelName = document.getElementById('channel-name');
-                this.channelGroup = document.getElementById('channel-group');
-                this.loading = document.getElementById('loading');
-                this.errorMessage = document.getElementById('error-message');
-                this.powerBtn = document.getElementById('power-btn');
-                this.powerLed = document.getElementById('power-led');
-                this.channelKnob = document.getElementById('channel-knob');
-                this.volumeKnob = document.getElementById('volume-knob');
-
-                // Panel elements
+                this.channelNameEl = document.getElementById('channel-name');
                 this.channelList = document.getElementById('channel-list');
-                this.scanBtn = document.getElementById('scan-btn');
                 this.activeCountEl = document.getElementById('active-count');
                 this.inactiveCountEl = document.getElementById('inactive-count');
+                this.scanBtn = document.getElementById('scan-btn');
+                this.scanBtnText = document.getElementById('scan-btn-text');
+                this.scanIndicator = document.getElementById('scan-indicator');
+                this.powerBtn = document.getElementById('power-btn');
+                this.channelKnob = document.getElementById('channel-knob');
+                this.volumeKnob = document.getElementById('volume-knob');
+                this.screen = document.getElementById('screen');
+                this.muteIcon = document.getElementById('mute-icon');
 
                 this.init();
             }
@@ -1082,29 +473,14 @@
 
             async init() {
                 await this.loadPlaylist();
-                this.buildChannelButtons();
+                this.buildChannelList();
                 this.setupEventListeners();
                 this.updateVolumeKnob();
                 this.updateStatusDisplay();
 
                 // Auto power on if we have channels
                 if (this.channels.length > 0) {
-                    this.isPoweredOn = true;
-                    this.powerBtn.classList.add('on');
-                    this.powerLed.classList.add('on');
-
-                    // Find first working channel or start scanning
-                    const firstWorking = this.channels.findIndex(ch =>
-                        this.workingChannels.has(ch.name + ch.url)
-                    );
-
-                    if (firstWorking >= 0) {
-                        this.currentChannel = firstWorking;
-                        this.playChannel(firstWorking);
-                    } else {
-                        // Start scanning automatically
-                        this.startScan();
-                    }
+                    this.powerOn();
                 }
             }
 
@@ -1130,7 +506,7 @@
                         currentChannel = this.parseExtInf(line);
                     } else if (line && !line.startsWith('#') && currentChannel) {
                         currentChannel.url = line;
-                        // ONLY include Argentina channels!
+                        // ONLY include Argentina channels
                         if (currentChannel.group &&
                             currentChannel.group.toLowerCase().includes('argentina') &&
                             !line.includes('youtube.com') &&
@@ -1143,43 +519,31 @@
             }
 
             parseExtInf(line) {
-                const channel = {
-                    name: '',
-                    logo: '',
-                    group: '',
-                    id: ''
-                };
-
+                const channel = { name: '', logo: '', group: '', id: '' };
                 const nameMatch = line.match(/tvg-name="([^"]*)"/);
                 if (nameMatch) channel.name = nameMatch[1];
-
                 const logoMatch = line.match(/tvg-logo="([^"]*)"/);
                 if (logoMatch) channel.logo = logoMatch[1];
-
                 const groupMatch = line.match(/group-title="([^"]*)"/);
                 if (groupMatch) channel.group = groupMatch[1];
-
                 const idMatch = line.match(/tvg-id="([^"]*)"/);
                 if (idMatch) channel.id = idMatch[1];
-
                 const commaIndex = line.lastIndexOf(',');
                 if (commaIndex !== -1 && !channel.name) {
                     channel.name = line.substring(commaIndex + 1).trim();
                 }
-
                 return channel;
             }
 
-            buildChannelButtons() {
+            buildChannelList() {
                 this.channelList.innerHTML = '';
 
                 if (this.channels.length === 0) {
                     this.channelList.innerHTML = `
-                        <div class="no-channels">
-                            <div class="no-channels-icon">😢</div>
-                            <div>No se encontraron canales argentinos</div>
-                            <div style="font-size: 11px; margin-top: 10px;">Intentá de nuevo más tarde</div>
-                        </div>
+                        <li class="text-center py-8">
+                            <span class="material-symbols-outlined text-4xl text-red-400">error</span>
+                            <p class="font-hand text-gray-500 text-xl mt-2">No se encontraron canales</p>
+                        </li>
                     `;
                     return;
                 }
@@ -1188,40 +552,80 @@
                     const key = channel.name + channel.url;
                     const isWorking = this.workingChannels.has(key);
                     const isFailed = this.failedChannels.has(key);
+                    const isUntested = !isWorking && !isFailed;
 
-                    const btn = document.createElement('button');
-                    btn.className = 'channel-btn';
-                    btn.dataset.index = index;
+                    const li = document.createElement('li');
+                    li.className = 'channel-item group flex items-center gap-3 cursor-pointer p-1 hover:bg-yellow-100/50 rounded transition-colors';
+                    li.dataset.index = index;
 
-                    if (isFailed) {
-                        btn.classList.add('inactive');
+                    let statusText, statusClass;
+                    if (isWorking) {
+                        statusText = 'En Vivo';
+                        statusClass = 'text-green-600';
+                    } else if (isFailed) {
+                        statusText = 'Sin Señal - Click para reintentar';
+                        statusClass = 'text-red-500';
+                    } else {
+                        statusText = 'Sin Probar';
+                        statusClass = 'text-yellow-600 bg-yellow-200 px-1';
                     }
 
-                    // Status indicator class
-                    let indicatorClass = 'unknown';
-                    if (isWorking) indicatorClass = 'online';
-                    else if (isFailed) indicatorClass = 'offline';
-
-                    btn.innerHTML = `
-                        ${channel.logo ?
-                            `<img class="channel-btn-logo" src="${channel.logo}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>📺</text></svg>'">` :
-                            `<div class="channel-btn-logo" style="display:flex;align-items:center;justify-content:center;font-size:20px;">📺</div>`
-                        }
-                        <div class="channel-btn-info">
-                            <div class="channel-btn-name">${channel.name}</div>
-                            <div class="channel-btn-status">${isWorking ? '✅ Activo' : isFailed ? '❌ Sin señal' : '❓ Sin probar'}</div>
+                    li.innerHTML = `
+                        <div class="font-hand text-2xl text-gray-400 w-8 text-right group-hover:text-red-600">${String(index + 1).padStart(2, '0')}</div>
+                        <div class="flex-1 border-b border-gray-300 pb-1 border-dashed">
+                            <h3 class="font-serif font-bold text-gray-800 text-lg leading-none">${channel.name}</h3>
+                            <span class="text-xs font-ui uppercase tracking-wider ${statusClass}">${statusText}</span>
                         </div>
-                        <div class="channel-btn-indicator ${indicatorClass}"></div>
+                        ${isWorking ? '<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>' : ''}
                     `;
 
-                    btn.addEventListener('click', () => {
-                        if (!isFailed) {
-                            this.selectChannel(index);
+                    // All channels are clickable - including failed ones for retry
+                    li.addEventListener('click', () => {
+                        // If it was failed, clear the failed status to retry
+                        if (isFailed) {
+                            this.failedChannels.delete(key);
+                            this.saveChannelStatus();
                         }
+                        this.selectChannel(index);
                     });
 
-                    this.channelList.appendChild(btn);
+                    this.channelList.appendChild(li);
                 });
+            }
+
+            updateChannelListItem(index) {
+                const channel = this.channels[index];
+                if (!channel) return;
+
+                const key = channel.name + channel.url;
+                const isWorking = this.workingChannels.has(key);
+                const isFailed = this.failedChannels.has(key);
+
+                const li = this.channelList.querySelector(`[data-index="${index}"]`);
+                if (!li) return;
+
+                let statusText, statusClass;
+                if (isWorking) {
+                    statusText = 'En Vivo';
+                    statusClass = 'text-green-600';
+                } else if (isFailed) {
+                    statusText = 'Sin Señal - Click para reintentar';
+                    statusClass = 'text-red-500';
+                } else {
+                    statusText = 'Sin Probar';
+                    statusClass = 'text-yellow-600 bg-yellow-200 px-1';
+                }
+
+                li.innerHTML = `
+                    <div class="font-hand text-2xl text-gray-400 w-8 text-right group-hover:text-red-600">${String(index + 1).padStart(2, '0')}</div>
+                    <div class="flex-1 border-b border-gray-300 pb-1 border-dashed">
+                        <h3 class="font-serif font-bold text-gray-800 text-lg leading-none">${channel.name}</h3>
+                        <span class="text-xs font-ui uppercase tracking-wider ${statusClass}">${statusText}</span>
+                    </div>
+                    ${isWorking ? '<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>' : ''}
+                `;
+
+                li.classList.remove('scanning');
             }
 
             selectChannel(index) {
@@ -1230,43 +634,17 @@
                 }
                 this.currentChannel = index;
                 this.playChannel(index);
-                this.updateActiveButton();
+                this.updateActiveChannel();
             }
 
-            updateActiveButton() {
-                // Remove active class from all buttons
-                document.querySelectorAll('.channel-btn').forEach(btn => {
-                    btn.classList.remove('active');
+            updateActiveChannel() {
+                document.querySelectorAll('.channel-item').forEach(item => {
+                    item.classList.remove('active');
                 });
-
-                // Add active class to current channel button
-                const activeBtn = document.querySelector(`.channel-btn[data-index="${this.currentChannel}"]`);
-                if (activeBtn) {
-                    activeBtn.classList.add('active');
-                    // Scroll into view
-                    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            }
-
-            updateChannelButton(index, isWorking, isFailed) {
-                const btn = document.querySelector(`.channel-btn[data-index="${index}"]`);
-                if (!btn) return;
-
-                const indicator = btn.querySelector('.channel-btn-indicator');
-                const status = btn.querySelector('.channel-btn-status');
-
-                btn.classList.remove('inactive', 'scanning');
-
-                if (isWorking) {
-                    indicator.className = 'channel-btn-indicator online';
-                    status.textContent = '✅ Activo';
-                } else if (isFailed) {
-                    btn.classList.add('inactive');
-                    indicator.className = 'channel-btn-indicator offline';
-                    status.textContent = '❌ Sin señal';
-                } else {
-                    indicator.className = 'channel-btn-indicator unknown';
-                    status.textContent = '❓ Sin probar';
+                const activeItem = this.channelList.querySelector(`[data-index="${this.currentChannel}"]`);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                    activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
             }
 
@@ -1282,6 +660,9 @@
 
                 // Mute button
                 document.getElementById('mute-btn').addEventListener('click', () => this.toggleMute());
+
+                // Screen click for fullscreen
+                this.screen.addEventListener('click', () => this.toggleFullscreen());
 
                 // Channel knob
                 this.channelKnob.addEventListener('click', (e) => {
@@ -1302,34 +683,19 @@
                 // Keyboard controls
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') return;
-
-                    if (e.key === 'f' || e.key === 'F') {
-                        if (!e.ctrlKey && !e.metaKey) {
-                            this.toggleFullscreen();
-                            return;
-                        }
+                    if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey) {
+                        this.toggleFullscreen();
+                        return;
                     }
-
-                    if (e.key === 'm' || e.key === 'M') {
-                        if (!e.ctrlKey && !e.metaKey) {
-                            this.toggleMute();
-                            return;
-                        }
+                    if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
+                        this.toggleMute();
+                        return;
                     }
-
                     switch(e.key) {
-                        case 'ArrowRight':
-                            this.nextChannel();
-                            break;
-                        case 'ArrowLeft':
-                            this.prevChannel();
-                            break;
-                        case 'ArrowUp':
-                            this.volumeUp();
-                            break;
-                        case 'ArrowDown':
-                            this.volumeDown();
-                            break;
+                        case 'ArrowRight': this.nextChannel(); break;
+                        case 'ArrowLeft': this.prevChannel(); break;
+                        case 'ArrowUp': this.volumeUp(); break;
+                        case 'ArrowDown': this.volumeDown(); break;
                         case ' ':
                             e.preventDefault();
                             this.togglePower();
@@ -1352,9 +718,8 @@
 
                 // Video events
                 this.video.addEventListener('playing', () => {
-                    this.loading.classList.remove('active');
-                    this.errorMessage.classList.remove('active');
-                    this.staticEl.classList.remove('active');
+                    this.loading.classList.add('hidden');
+                    this.noSignal.classList.add('hidden');
                     clearTimeout(this.loadTimeout);
 
                     const ch = this.channels[this.currentChannel];
@@ -1364,37 +729,31 @@
                         this.failedChannels.delete(key);
                         this.saveChannelStatus();
                         this.updateStatusDisplay();
-                        this.updateChannelButton(this.currentChannel, true, false);
+                        this.updateChannelListItem(this.currentChannel);
                     }
                 });
 
                 this.video.addEventListener('waiting', () => {
-                    this.loading.classList.add('active');
+                    this.loading.classList.remove('hidden');
                 });
 
                 this.video.addEventListener('error', () => {
                     this.handleChannelError();
-                });
-
-                this.video.addEventListener('click', () => {
-                    this.toggleFullscreen();
                 });
             }
 
             toggleFullscreen() {
                 if (!this.isPoweredOn) return;
 
-                const screen = document.querySelector('.screen');
-
                 if (document.fullscreenElement) {
                     document.exitFullscreen();
                 } else if (document.webkitFullscreenElement) {
                     document.webkitExitFullscreen();
                 } else {
-                    if (screen.requestFullscreen) {
-                        screen.requestFullscreen();
-                    } else if (screen.webkitRequestFullscreen) {
-                        screen.webkitRequestFullscreen();
+                    if (this.screen.requestFullscreen) {
+                        this.screen.requestFullscreen();
+                    } else if (this.screen.webkitRequestFullscreen) {
+                        this.screen.webkitRequestFullscreen();
                     }
                 }
             }
@@ -1402,34 +761,29 @@
             toggleMute() {
                 this.isMuted = !this.isMuted;
                 this.video.muted = this.isMuted;
-                const muteBtn = document.getElementById('mute-btn');
-                muteBtn.textContent = this.isMuted ? '🔇 MUTE' : '🔊 AUDIO';
+                this.muteIcon.textContent = this.isMuted ? 'volume_off' : 'volume_up';
             }
 
             toggleScan() {
-                if (!this.isPoweredOn) {
-                    this.powerOn();
-                }
-                if (this.isScanning) {
-                    this.stopScan();
-                } else {
-                    this.startScan();
-                }
+                if (!this.isPoweredOn) this.powerOn();
+                if (this.isScanning) this.stopScan();
+                else this.startScan();
             }
 
             startScan() {
                 this.isScanning = true;
-                this.scanBtn.classList.add('scanning');
-                this.scanBtn.textContent = '⏹️ DETENER ESCANEO';
+                this.scanBtn.classList.add('bg-gray-600');
+                this.scanBtnText.textContent = 'Detener Escaneo';
+                this.scanIndicator.classList.add('animate-pulse');
                 this.scanIndex = 0;
 
-                // Reset scan state for untested channels
-                document.querySelectorAll('.channel-btn').forEach(btn => {
-                    const index = parseInt(btn.dataset.index);
+                // Mark untested channels as scanning
+                document.querySelectorAll('.channel-item').forEach(item => {
+                    const index = parseInt(item.dataset.index);
                     const ch = this.channels[index];
                     const key = ch.name + ch.url;
                     if (!this.workingChannels.has(key) && !this.failedChannels.has(key)) {
-                        btn.classList.add('scanning');
+                        item.classList.add('scanning');
                     }
                 });
 
@@ -1439,24 +793,21 @@
 
             stopScan() {
                 this.isScanning = false;
-                this.scanBtn.classList.remove('scanning');
-                this.scanBtn.textContent = '🔍 ESCANEAR CANALES';
+                this.scanBtn.classList.remove('bg-gray-600');
+                this.scanBtnText.textContent = 'Escanear Canales';
+                this.scanIndicator.classList.remove('animate-pulse');
 
-                document.querySelectorAll('.channel-btn.scanning').forEach(btn => {
-                    btn.classList.remove('scanning');
+                document.querySelectorAll('.channel-item.scanning').forEach(item => {
+                    item.classList.remove('scanning');
                 });
 
                 this.scanWorkers.forEach(w => {
                     clearTimeout(w.timeout);
                     if (w.hls) w.hls.destroy();
-                    if (w.onPlaying) {
-                        w.video.removeEventListener('playing', w.onPlaying);
-                    }
+                    if (w.onPlaying) w.video.removeEventListener('playing', w.onPlaying);
                     w.video.src = '';
                     w.video.load();
-                    if (w.video.parentNode) {
-                        w.video.parentNode.removeChild(w.video);
-                    }
+                    if (w.video.parentNode) w.video.parentNode.removeChild(w.video);
                 });
                 this.scanWorkers = [];
             }
@@ -1496,14 +847,11 @@
                     const allDone = this.scanWorkers.every(w => w.index === -1);
                     if (allDone) {
                         this.stopScan();
-                        // Play first working channel if none playing
                         if (!this.video.src || this.video.paused) {
                             const firstWorking = this.channels.findIndex(ch =>
                                 this.workingChannels.has(ch.name + ch.url)
                             );
-                            if (firstWorking >= 0) {
-                                this.selectChannel(firstWorking);
-                            }
+                            if (firstWorking >= 0) this.selectChannel(firstWorking);
                         }
                     }
                     return;
@@ -1512,18 +860,9 @@
                 worker.index = index;
                 const channel = this.channels[index];
 
-                // Update button to show scanning
-                const btn = document.querySelector(`.channel-btn[data-index="${index}"]`);
-                if (btn) btn.classList.add('scanning');
-
                 clearTimeout(worker.timeout);
-                if (worker.hls) {
-                    worker.hls.destroy();
-                    worker.hls = null;
-                }
-                if (worker.onPlaying) {
-                    worker.video.removeEventListener('playing', worker.onPlaying);
-                }
+                if (worker.hls) { worker.hls.destroy(); worker.hls = null; }
+                if (worker.onPlaying) worker.video.removeEventListener('playing', worker.onPlaying);
                 worker.video.src = '';
 
                 worker.timeout = setTimeout(() => this.onWorkerFail(worker), 4000);
@@ -1565,9 +904,8 @@
                     this.failedChannels.delete(key);
                     this.saveChannelStatus();
                     this.updateStatusDisplay();
-                    this.updateChannelButton(foundIndex, true, false);
+                    this.updateChannelListItem(foundIndex);
 
-                    // If no channel playing, play this one
                     if (!this.video.src || this.video.error) {
                         this.selectChannel(foundIndex);
                     }
@@ -1593,7 +931,7 @@
                     this.workingChannels.delete(key);
                     this.saveChannelStatus();
                     this.updateStatusDisplay();
-                    this.updateChannelButton(worker.index, false, true);
+                    this.updateChannelListItem(worker.index);
                 }
 
                 worker.index = -1;
@@ -1608,53 +946,43 @@
                     this.workingChannels.delete(key);
                     this.saveChannelStatus();
                     this.updateStatusDisplay();
-                    this.updateChannelButton(this.currentChannel, false, true);
+                    this.updateChannelListItem(this.currentChannel);
                 }
-
-                // Try next working channel
                 this.nextWorkingChannel();
             }
 
             nextWorkingChannel() {
-                const startIndex = this.currentChannel;
                 let nextIndex = (this.currentChannel + 1) % this.channels.length;
                 let attempts = 0;
 
                 while (attempts < this.channels.length) {
                     const ch = this.channels[nextIndex];
                     const key = ch.name + ch.url;
-
-                    // Prefer working channels, skip failed ones
                     if (this.workingChannels.has(key) || !this.failedChannels.has(key)) {
                         this.currentChannel = nextIndex;
                         this.playChannel(nextIndex);
-                        this.updateActiveButton();
+                        this.updateActiveChannel();
                         return;
                     }
-
                     nextIndex = (nextIndex + 1) % this.channels.length;
                     attempts++;
                 }
 
-                // All channels failed
-                this.showError();
+                this.showNoSignal();
             }
 
             togglePower() {
                 this.isPoweredOn = !this.isPoweredOn;
-
-                if (this.isPoweredOn) {
-                    this.powerOn();
-                } else {
-                    this.powerOff();
-                }
+                if (this.isPoweredOn) this.powerOn();
+                else this.powerOff();
             }
 
             powerOn() {
                 this.isPoweredOn = true;
-                this.powerBtn.classList.add('on');
-                this.powerLed.classList.add('on');
-                this.staticEl.classList.add('active');
+                this.powerBtn.querySelector('span').classList.remove('text-red-500');
+                this.powerBtn.querySelector('span').classList.add('text-green-500');
+                this.noSignal.classList.remove('hidden');
+                this.loading.classList.add('hidden');
 
                 setTimeout(() => {
                     if (this.channels.length > 0) {
@@ -1663,82 +991,51 @@
                         );
                         if (firstWorking >= 0) {
                             this.currentChannel = firstWorking;
+                            this.playChannel(firstWorking);
+                            this.updateActiveChannel();
+                        } else {
+                            this.startScan();
                         }
-                        this.playChannel(this.currentChannel);
-                        this.updateActiveButton();
                     }
                 }, 500);
             }
 
             powerOff() {
                 this.isPoweredOn = false;
-                this.powerBtn.classList.remove('on');
-                this.powerLed.classList.remove('on');
-                this.staticEl.classList.remove('active');
-                this.loading.classList.remove('active');
-                this.errorMessage.classList.remove('active');
-                this.channelDisplay.classList.remove('visible');
-                this.channelInfo.classList.remove('visible');
+                this.powerBtn.querySelector('span').classList.add('text-red-500');
+                this.powerBtn.querySelector('span').classList.remove('text-green-500');
+                this.noSignal.classList.remove('hidden');
+                this.loading.classList.add('hidden');
+                this.channelInfo.style.opacity = '0';
 
-                if (this.isScanning) {
-                    this.stopScan();
-                }
-
-                if (this.hls) {
-                    this.hls.destroy();
-                    this.hls = null;
-                }
+                if (this.isScanning) this.stopScan();
+                if (this.hls) { this.hls.destroy(); this.hls = null; }
                 this.video.src = '';
                 this.video.load();
 
-                document.querySelectorAll('.channel-btn').forEach(btn => {
-                    btn.classList.remove('active');
+                document.querySelectorAll('.channel-item').forEach(item => {
+                    item.classList.remove('active');
                 });
             }
 
             nextChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
 
-                // Find next non-failed channel
                 let nextIndex = (this.currentChannel + 1) % this.channels.length;
-                let attempts = 0;
-
-                while (attempts < this.channels.length) {
-                    const ch = this.channels[nextIndex];
-                    const key = ch.name + ch.url;
-                    if (!this.failedChannels.has(key)) {
-                        break;
-                    }
-                    nextIndex = (nextIndex + 1) % this.channels.length;
-                    attempts++;
-                }
-
                 this.currentChannel = nextIndex;
                 this.playChannel(this.currentChannel);
+                this.updateActiveChannel();
                 this.animateChannelKnob(1);
-                this.updateActiveButton();
             }
 
             prevChannel() {
                 if (!this.isPoweredOn || this.channels.length === 0) return;
 
                 let prevIndex = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
-                let attempts = 0;
-
-                while (attempts < this.channels.length) {
-                    const ch = this.channels[prevIndex];
-                    const key = ch.name + ch.url;
-                    if (!this.failedChannels.has(key)) {
-                        break;
-                    }
-                    prevIndex = (prevIndex - 1 + this.channels.length) % this.channels.length;
-                    attempts++;
-                }
-
                 this.currentChannel = prevIndex;
                 this.playChannel(this.currentChannel);
+                this.updateActiveChannel();
                 this.animateChannelKnob(-1);
-                this.updateActiveButton();
             }
 
             playChannel(index) {
@@ -1747,17 +1044,12 @@
 
                 clearTimeout(this.loadTimeout);
 
-                this.staticEl.classList.add('active');
-                this.loading.classList.add('active');
-                this.errorMessage.classList.remove('active');
+                this.loading.classList.remove('hidden');
+                this.noSignal.classList.add('hidden');
 
-                this.showChannelDisplay(index + 1);
                 this.showChannelInfo(channel);
 
-                if (this.hls) {
-                    this.hls.destroy();
-                    this.hls = null;
-                }
+                if (this.hls) { this.hls.destroy(); this.hls = null; }
 
                 this.loadTimeout = setTimeout(() => {
                     this.handleChannelError();
@@ -1767,19 +1059,14 @@
 
                 if (url.includes('.m3u8')) {
                     if (Hls.isSupported()) {
-                        this.hls = new Hls({
-                            enableWorker: true,
-                            lowLatencyMode: true,
-                        });
+                        this.hls = new Hls({ enableWorker: true, lowLatencyMode: true });
                         this.hls.loadSource(url);
                         this.hls.attachMedia(this.video);
                         this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
                             this.video.play().catch(() => {});
                         });
                         this.hls.on(Hls.Events.ERROR, (event, data) => {
-                            if (data.fatal) {
-                                this.handleChannelError();
-                            }
+                            if (data.fatal) this.handleChannelError();
                         });
                     } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
                         this.video.src = url;
@@ -1794,39 +1081,27 @@
                 this.video.muted = this.isMuted;
             }
 
-            showChannelDisplay(num) {
-                this.channelDisplay.textContent = `🇦🇷 CH ${num.toString().padStart(2, '0')}`;
-                this.channelDisplay.classList.add('visible');
-
-                clearTimeout(this.channelDisplayTimeout);
-                this.channelDisplayTimeout = setTimeout(() => {
-                    this.channelDisplay.classList.remove('visible');
-                }, 3000);
-            }
-
             showChannelInfo(channel) {
-                this.channelName.textContent = channel.name;
-                this.channelGroup.textContent = '🇦🇷 Argentina';
+                this.channelNameEl.textContent = channel.name;
 
                 if (channel.logo) {
                     this.channelLogo.src = channel.logo;
-                    this.channelLogo.style.display = 'block';
+                    this.channelLogo.classList.remove('hidden');
                 } else {
-                    this.channelLogo.style.display = 'none';
+                    this.channelLogo.classList.add('hidden');
                 }
 
-                this.channelInfo.classList.add('visible');
+                this.channelInfo.style.opacity = '1';
 
-                clearTimeout(this.infoDisplayTimeout);
-                this.infoDisplayTimeout = setTimeout(() => {
-                    this.channelInfo.classList.remove('visible');
+                clearTimeout(this.channelInfoTimeout);
+                this.channelInfoTimeout = setTimeout(() => {
+                    this.channelInfo.style.opacity = '0';
                 }, 5000);
             }
 
-            showError() {
-                this.loading.classList.remove('active');
-                this.staticEl.classList.add('active');
-                this.errorMessage.classList.add('active');
+            showNoSignal() {
+                this.loading.classList.add('hidden');
+                this.noSignal.classList.remove('hidden');
             }
 
             volumeUp() {
@@ -1842,13 +1117,15 @@
             }
 
             animateChannelKnob(direction) {
-                const currentRotation = (this.currentChannel * 15) % 360;
-                this.channelKnob.style.setProperty('--rotation', `${currentRotation}deg`);
+                const rotation = (this.currentChannel * 15) % 360;
+                const indicator = this.channelKnob.querySelector('div');
+                if (indicator) indicator.style.setProperty('--rotation', `${rotation}deg`);
             }
 
             updateVolumeKnob() {
                 const rotation = (this.volume * 270) - 135;
-                this.volumeKnob.style.setProperty('--rotation', `${rotation}deg`);
+                const indicator = this.volumeKnob.querySelector('div');
+                if (indicator) indicator.style.setProperty('--rotation', `${rotation}deg`);
             }
         }
 
@@ -1861,12 +1138,8 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('🇦🇷 ServiceWorker registered:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed:', error);
-                    });
+                    .then(registration => console.log('🇦🇷 ServiceWorker registered:', registration.scope))
+                    .catch(error => console.log('ServiceWorker registration failed:', error));
             });
         }
     </script>

@@ -1,12 +1,12 @@
 {
-  "name": "Tele Argentina - TV Argentina",
-  "short_name": "Tele Argentina",
-  "description": "¡Vamos Argentina! Tu TV argentina favorita con todos los canales del país. Mirá tus canales argentinos favoritos.",
+  "name": "TeleArgentina de Adela - Retro TV",
+  "short_name": "TeleArgentina",
+  "description": "TeleArgentina de Adela - Para mi nieto querido. Tu TV argentina favorita con todos los canales del país.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#75AADB",
-  "theme_color": "#75AADB",
+  "background_color": "#5D4037",
+  "theme_color": "#5D4037",
   "categories": ["entertainment", "video"],
   "lang": "es-AR",
   "icons": [
