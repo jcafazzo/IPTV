@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="theme-color" content="#5D4037">
+    <meta name="description" content="TeleArgentina de Adela - Tu TV argentina favorita con todos los canales del país">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TeleArgentina">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+    <title>TeleArgentina de Adela - Retro TV</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries,typography"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lobster&amp;family=Caveat:wght@400;700&amp;family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Roboto+Condensed:wght@400;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        wood: {
+                            light: '#8D6E63',
+                            base: '#5D4037',
+                            dark: '#3E2723',
+                            grain: '#4E342E',
+                        },
+                        chrome: {
+                            light: '#F5F5F5',
+                            base: '#BDBDBD',
+                            dark: '#616161',
+                        },
+                        paper: {
+                            light: '#FFF8E1',
+                            lines: '#90CAF9',
+                        },
+                        primary: "#38bdf8",
+                        secondary: "#facc15",
+                        "tv-dark": "#0a0a0a",
+                    },
+                    fontFamily: {
+                        display: ["'Lobster'", "cursive"],
+                        hand: ["'Caveat'", "cursive"],
+                        serif: ["'Playfair Display'", "serif"],
+                        ui: ["'Roboto Condensed'", "sans-serif"],
+                    },
+                    boxShadow: {
+                        '3d': '0 4px 0px 0px rgba(0,0,0,0.3)',
+                        'inner-screen': 'inset 0 0 40px 10px rgba(0,0,0,0.8)',
+                        'knob': '2px 2px 5px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.3)',
+                        'polaroid': '3px 3px 10px rgba(0,0,0,0.3)',
+                    },
+                    backgroundImage: {
+                        'wood-pattern': "repeating-linear-gradient(45deg, #5D4037 0px, #5D4037 10px, #4E342E 10px, #4E342E 12px, #5D4037 12px, #5D4037 24px, #3E2723 24px, #3E2723 26px)",
+                        'chrome-gradient': "linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 50%, #616161 100%)",
+                        'brushed-metal': "repeating-linear-gradient(90deg, #ccc 0, #ccc 1px, #bbb 1px, #bbb 2px)",
+                        'wallpaper': "radial-gradient(#d7ccc8 15%, transparent 16%), radial-gradient(#d7ccc8 15%, transparent 16%)",
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        .wood-texture {
+            background-color: #5D4037;
+            background-image:
+                repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px),
+                var(--tw-gradient-stops);
+        }
+
+        .wall-pattern {
+            background-color: #EFEBE9;
+            background-image: radial-gradient(#D7CCC8 2px, transparent 2px), radial-gradient(#D7CCC8 2px, transparent 2px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .channel-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .channel-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .channel-scroll::-webkit-scrollbar-thumb {
+            background: #BCAAA4;
+            border-radius: 10px;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.97;
+            }
+
+            5% {
+                opacity: 0.95;
+            }
+
+            10% {
+                opacity: 0.9;
+            }
+
+            15% {
+                opacity: 0.95;
+            }
+
+            20% {
+                opacity: 0.98;
+            }
+
+            50% {
+                opacity: 0.95;
+            }
+
+            80% {
+                opacity: 0.9;
+            }
+
+            100% {
+                opacity: 0.97;
+            }
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+            pointer-events: none;
+        }
+
+        .polaroid-wrapper {
+            transition: transform 0.3s ease;
+        }
+
+        .polaroid-wrapper:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 50;
+        }
+
+        .metal-knob {
+            background: conic-gradient(#d7d7d7, #ffffff, #d7d7d7, #999999, #d7d7d7);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4), inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .gold-leaf {
+            background: linear-gradient(to bottom, #cfc09f 22%, #ffecb3 24%, #3a2c0f 26%, #3a2c0f 27%, #ffecb3 40%, #997f43 78%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Video player styles */
+        #video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+        }
+
+        .screen:fullscreen,
+        .screen:-webkit-full-screen {
+            background: #000;
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        .screen:fullscreen #video-player,
+        .screen:-webkit-full-screen #video-player {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .screen:fullscreen .crt-overlay,
+        .screen:-webkit-full-screen .crt-overlay {
+            display: none;
+        }
+
+        /* Channel list item states */
+        .channel-item {
+            transition: all 0.2s ease;
+        }
+
+        .channel-item:hover {
+            transform: translateX(4px);
+        }
+
+        .channel-item.active {
+            background: rgba(254, 243, 199, 0.9) !important;
+            transform: rotate(-1deg);
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .channel-item.scanning {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        /* Loading spinner */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body
+    class="wall-pattern min-h-screen flex items-center justify-center p-4 transition-colors duration-300 font-ui overflow-hidden relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-orange-100/20 to-black/40 pointer-events-none z-0"></div>
+
+    <div class="absolute top-8 left-8 flex flex-col gap-1 opacity-80 pointer-events-none z-0">
+        <h1 class="font-display text-4xl text-wood-dark drop-shadow-md -rotate-2">TeleArgentina de Adela</h1>
+
+    </div>
+
+    <main
+        class="flex flex-col lg:flex-row gap-12 items-center justify-center w-full max-w-7xl z-10 scale-90 lg:scale-100 relative">
+        <!-- Left polaroid (now Bottom Left) -->
+        <div class="absolute -bottom-24 -left-8 z-10 transform -rotate-[5deg] polaroid-wrapper hover:z-50">
+            <div class="bg-white p-2 pb-6 shadow-polaroid w-52 rotate-3 border border-gray-200">
+                <div
+                    class="bg-gray-200 h-36 w-full overflow-hidden grayscale-[10%] sepia-[20%] hover:grayscale-0 hover:sepia-0 transition-all relative">
+                    <img alt="Familia reunida" class="w-full h-full object-cover" src="assets/IMG_7924.jpg" />
+                    <div class="absolute inset-0 bg-yellow-900/10 mix-blend-multiply pointer-events-none"></div>
+                </div>
+
+            </div>
+            <div
+                class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-red-800 rounded-full shadow-md z-20 border-2 border-red-900">
+            </div>
+        </div>
+
+        <div
+            class="absolute -bottom-10 -right-20 z-20 transform rotate-12 polaroid-wrapper hidden lg:block opacity-80 hover:opacity-100 transition-opacity">
+            <div class="bg-white p-3 pb-8 shadow-polaroid w-40 -rotate-3">
+                <div class="bg-gray-200 h-28 w-full overflow-hidden grayscale-[30%] hover:grayscale-0 transition-all">
+                    <img alt="Familia en la calle" class="w-full h-full object-cover" src="assets/IMG_7900-EDIT.jpg" />
+                </div>
+
+            </div>
+            <div
+                class="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-12 bg-white/40 -rotate-45 backdrop-blur-sm border-r border-white/60 shadow-sm">
+            </div>
+        </div>
+
+        <!-- TV Set -->
+        <div class="relative group">
+            <!-- Antenna -->
+            <div
+                class="absolute -top-24 left-1/2 transform -translate-x-1/2 w-64 h-32 flex justify-between items-end z-0">
+                <div
+                    class="w-1.5 h-32 bg-gradient-to-t from-gray-400 to-gray-200 rounded-full transform -rotate-[35deg] origin-bottom shadow-lg border border-gray-500">
+                    <div class="w-3 h-3 bg-red-500 rounded-full absolute -top-1 -left-1 shadow-sm"></div>
+                </div>
+                <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+                    <div class="relative w-16 h-16 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-yellow-500/80 text-7xl drop-shadow-lg animate-pulse"
+                            style="font-variation-settings: 'FILL' 1;">sunny</span>
+                    </div>
+                </div>
+                <div
+                    class="w-1.5 h-32 bg-gradient-to-t from-gray-400 to-gray-200 rounded-full transform rotate-[35deg] origin-bottom shadow-lg border border-gray-500">
+                </div>
+            </div>
+
+            <!-- TV Feet -->
+            <div class="absolute -bottom-4 left-16 w-8 h-8 bg-wood-dark rounded-full shadow-lg"></div>
+            <div class="absolute -bottom-4 right-16 w-8 h-8 bg-wood-dark rounded-full shadow-lg"></div>
+
+            <!-- TV Cabinet -->
+            <div
+                class="relative bg-gradient-to-br from-wood-base via-wood-grain to-wood-dark w-[720px] h-[520px] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col items-center p-8 box-border border-r-[8px] border-b-[8px] border-wood-dark border-t-[2px] border-l-[2px] border-wood-light">
+                <div class="absolute inset-0 opacity-30 bg-wood-pattern pointer-events-none mix-blend-overlay"></div>
+                <div
+                    class="absolute inset-4 rounded-[1.5rem] border-4 border-gray-300/50 pointer-events-none z-10 shadow-inner">
+                </div>
+
+                <!-- Small polaroid on TV -->
+                <div class="absolute top-6 right-[140px] z-30 transform rotate-[8deg] polaroid-wrapper">
+                    <div class="bg-white p-1 pb-4 shadow-md w-32 border border-gray-300">
+                        <div
+                            class="bg-gray-200 h-24 w-full overflow-hidden grayscale-[15%] contrast-125 sepia-[15%] hover:grayscale-0 hover:sepia-0 transition-all relative">
+                            <img alt="Mirando algo" class="w-full h-full object-cover" src="assets/IMG_7930-EDIT.jpg" />
+                            <div class="absolute inset-0 bg-orange-500/10 mix-blend-screen pointer-events-none"></div>
+                        </div>
+                        <div
+                            class="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-10 bg-yellow-200/60 rotate-90 backdrop-blur-sm shadow-sm border border-yellow-100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full h-full flex gap-6 z-20 items-center">
+                    <!-- Screen -->
+                    <div id="screen"
+                        class="screen flex-1 h-[360px] bg-black rounded-[2rem] border-[12px] border-gray-800 shadow-inner-screen relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-shadow duration-500 ring-4 ring-gray-400/30 cursor-pointer">
+                        <!-- Video Player -->
+                        <video id="video-player" playsinline></video>
+
+                        <!-- YouTube Player (iframe) -->
+                        <iframe id="youtube-player" class="absolute inset-0 w-full h-full hidden" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                            allowfullscreen>
+                        </iframe>
+
+                        <!-- No signal state -->
+                        <div id="no-signal"
+                            class="absolute inset-0 bg-gray-900 flex items-center justify-center pointer-events-none">
+                            <div class="text-center opacity-40">
+                                <span
+                                    class="material-symbols-outlined text-6xl text-white mb-2 animate-pulse">tv_off</span>
+                                <p class="text-white font-ui tracking-widest text-sm opacity-70">SIN SEÑAL</p>
+                            </div>
+                        </div>
+
+                        <!-- Loading state -->
+                        <div id="loading"
+                            class="absolute inset-0 bg-gray-900/80 flex items-center justify-center hidden pointer-events-none">
+                            <div class="text-center">
+                                <span
+                                    class="material-symbols-outlined text-6xl text-yellow-500 loading-spinner">sports_soccer</span>
+                                <p class="text-white font-ui tracking-widest text-sm mt-2">SINTONIZANDO...</p>
+                            </div>
+                        </div>
+
+                        <!-- Channel info overlay -->
+                        <div id="channel-info"
+                            class="absolute bottom-4 left-4 right-4 bg-black/80 rounded-lg p-3 flex items-center gap-3 opacity-0 transition-opacity pointer-events-none">
+                            <img id="channel-logo" src="" alt=""
+                                class="w-12 h-12 object-contain bg-white rounded p-1 hidden">
+                            <div class="flex-1">
+                                <p id="channel-name" class="text-white font-bold text-lg"></p>
+                                <p class="text-yellow-500 text-sm font-ui">🇦🇷 Argentina</p>
+                            </div>
+                        </div>
+
+                        <!-- CRT effects overlay -->
+                        <div
+                            class="crt-overlay absolute top-0 right-0 w-full h-2/3 bg-gradient-to-b from-white/10 to-transparent rounded-t-[1.5rem] pointer-events-none">
+                        </div>
+                        <div
+                            class="crt-overlay absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 background-size-[100%_2px,3px_100%] pointer-events-none opacity-50">
+                        </div>
+                    </div>
+
+                    <!-- Control Panel -->
+                    <div
+                        class="w-32 h-[360px] bg-gradient-to-b from-neutral-200 to-neutral-400 rounded-xl border border-neutral-500 shadow-inner flex flex-col items-center justify-between py-4 px-2 relative">
+                        <!-- Corner screws -->
+                        <div
+                            class="absolute top-2 left-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center">
+                            <div class="w-full h-[1px] bg-gray-600 rotate-45"></div>
+                        </div>
+                        <div
+                            class="absolute top-2 right-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center">
+                            <div class="w-full h-[1px] bg-gray-600 rotate-45"></div>
+                        </div>
+                        <div
+                            class="absolute bottom-2 left-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center">
+                            <div class="w-full h-[1px] bg-gray-600 rotate-45"></div>
+                        </div>
+                        <div
+                            class="absolute bottom-2 right-2 w-2 h-2 bg-gray-400 rounded-full shadow-inner flex items-center justify-center">
+                            <div class="w-full h-[1px] bg-gray-600 rotate-45"></div>
+                        </div>
+
+                        <!-- Argentina Flag -->
+                        <div
+                            class="w-20 h-12 bg-sky-200 border-2 border-yellow-500 rounded shadow-md flex items-center justify-center mb-2 overflow-hidden relative">
+                            <div class="absolute inset-x-0 top-0 h-1/3 bg-sky-400"></div>
+                            <div class="absolute inset-x-0 bottom-0 h-1/3 bg-sky-400"></div>
+                            <div class="z-10 bg-yellow-400 rounded-full w-4 h-4 shadow-sm"></div>
+                        </div>
+
+                        <!-- Channel Knob -->
+                        <div class="flex flex-col items-center gap-1">
+                            <div id="channel-knob"
+                                class="w-16 h-16 rounded-full metal-knob flex items-center justify-center cursor-pointer active:rotate-12 transition-transform shadow-lg relative border-4 border-gray-300">
+                                <div class="absolute top-1 w-1 h-3 bg-red-500 rounded"
+                                    style="transform: rotate(var(--rotation, 0deg)); transform-origin: center 24px;">
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-gray-600 text-2xl font-bold">sports_soccer</span>
+                            </div>
+                            <span
+                                class="text-[10px] font-ui text-black font-bold uppercase tracking-widest bg-gray-200 px-1 rounded border border-gray-400 shadow-sm">Canal</span>
+                        </div>
+
+                        <!-- Volume Knob -->
+                        <div class="flex flex-col items-center gap-1">
+                            <div id="volume-knob"
+                                class="w-16 h-16 rounded-full metal-knob flex items-center justify-center cursor-pointer active:rotate-12 transition-transform shadow-lg border-4 border-gray-300 relative">
+                                <div class="absolute top-1 w-1 h-3 bg-black rounded"
+                                    style="transform: rotate(var(--rotation, -90deg)); transform-origin: center 24px;">
+                                </div>
+                                <span class="material-symbols-outlined text-gray-600 text-2xl">volume_up</span>
+                            </div>
+                            <span
+                                class="text-[10px] font-ui text-black font-bold uppercase tracking-widest bg-gray-200 px-1 rounded border border-gray-400 shadow-sm">Audio</span>
+                        </div>
+
+                        <!-- Power Button -->
+                        <div class="mt-auto">
+                            <button id="power-btn"
+                                class="w-12 h-12 rounded bg-black border-b-4 border-r-4 border-gray-800 shadow-lg flex items-center justify-center group active:scale-95 active:border-0 transition-all active:translate-y-1">
+                                <span
+                                    class="material-symbols-outlined text-red-500 text-xl group-hover:text-red-400 transition-colors">power_settings_new</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom buttons -->
+                <div class="w-full flex items-center justify-between px-12 mt-4 z-20">
+                    <button id="fullscreen-btn"
+                        class="bg-wood-light hover:bg-wood-light/80 text-cream-100 border-2 border-wood-dark px-3 py-1 rounded shadow-md font-ui text-xs uppercase flex items-center gap-1 text-white">
+                        <span class="material-symbols-outlined text-sm">fullscreen</span>
+                        Pantalla
+                    </button>
+                    <div
+                        class="bg-gradient-to-r from-gray-800 via-black to-gray-800 px-6 py-2 rounded border-2 border-gray-400 shadow-lg flex items-center gap-3">
+                        <div class="w-full h-[1px] bg-gray-600"></div>
+                        <span
+                            class="font-display text-yellow-500 text-2xl tracking-wide whitespace-nowrap gold-leaf">TeleArgentina</span>
+                        <div class="w-full h-[1px] bg-gray-600"></div>
+                    </div>
+                    <button id="mute-btn"
+                        class="bg-wood-light hover:bg-wood-light/80 text-cream-100 border-2 border-wood-dark px-3 py-1 rounded shadow-md font-ui text-xs uppercase flex items-center gap-1 text-white">
+                        <span class="material-symbols-outlined text-sm" id="mute-icon">volume_up</span>
+                        Sonido
+                    </button>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Channel Guide Notebook -->
+        <aside
+            class="w-[320px] h-[550px] bg-paper-light relative shadow-2xl flex flex-col overflow-hidden transform rotate-1 border-l border-gray-300">
+            <!-- Spiral binding -->
+            <div
+                class="absolute top-0 left-0 bottom-0 w-8 bg-neutral-800 z-20 flex flex-col items-center py-4 gap-3 shadow-2xl">
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+                <div class="w-4 h-4 rounded-full bg-gray-400 shadow-inner"></div>
+            </div>
+
+            <!-- Notebook content -->
+            <div
+                class="pl-10 pr-4 py-6 h-full flex flex-col bg-[linear-gradient(transparent_23px,#90CAF9_24px)] bg-[length:100%_24px]">
+                <div class="text-center mb-4 rotate-1 border-b-2 border-red-800/20 pb-2">
+                    <h2 class="font-serif italic text-3xl text-red-900">Guía de Canales</h2>
+                    <p class="font-hand text-gray-500 text-xl">Buenos Aires, Argentina</p>
+                </div>
+
+                <!-- Legend -->
+                <div
+                    class="flex justify-center gap-4 text-xs font-bold text-gray-600 mb-4 font-ui uppercase tracking-widest">
+                    <span class="flex items-center gap-1">
+                        <div class="w-2 h-2 bg-green-600 rounded-full"></div> <span id="active-count">0</span> En Vivo
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <div class="w-2 h-2 bg-red-400 rounded-full"></div> <span id="inactive-count">0</span> Cortado
+                    </span>
+                </div>
+
+                <!-- Channel list -->
+                <ul id="channel-list" class="flex-1 overflow-y-auto pr-2 space-y-2 channel-scroll">
+                    <li class="text-center py-8">
+                        <span
+                            class="material-symbols-outlined text-4xl text-gray-400 loading-spinner">sports_soccer</span>
+                        <p class="font-hand text-gray-500 text-xl mt-2">Cargando canales...</p>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Sticky note -->
+            <div
+                class="absolute bottom-12 right-6 bg-yellow-200 w-32 p-3 shadow-lg rotate-3 text-center transform hover:scale-110 transition-transform z-30">
+                <div class="w-8 h-2 bg-yellow-400/50 absolute -top-1 left-1/2 -translate-x-1/2 rotate-2"></div>
+                <p class="font-hand text-gray-800 text-lg leading-tight">No olvidarse de apagar la tele nene!</p>
+            </div>
+
+            <!-- Scan buttons -->
+            <div class="p-4 bg-transparent border-t border-gray-300 mt-auto ml-8 space-y-2">
+                <button id="scan-btn"
+                    class="w-full bg-red-700 hover:bg-red-800 text-white font-ui uppercase tracking-widest py-2 rounded shadow-md border-b-4 border-red-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 text-sm">
+                    <span class="w-2 h-2 bg-white rounded-full" id="scan-indicator"></span>
+                    <span id="scan-btn-text">Escanear Canales</span>
+                </button>
+                <button id="rescan-btn"
+                    class="w-full bg-wood-base hover:bg-wood-dark text-white font-ui uppercase tracking-widest py-1.5 rounded shadow-md border-b-2 border-wood-dark active:border-b-0 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 text-xs">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    <span>Reescanear Todo</span>
+                </button>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // TeleArgentina de Adela - Argentina TV App
+
+        // Additional Argentina channels (hardcoded)
+        const EXTRA_ARGENTINA_CHANNELS = [
+            { name: 'Aunar', url: 'https://5fb24b460df87.streamlock.net/live-cont.ar/mirador/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Cine.AR', url: 'https://5fb24b460df87.streamlock.net/live-cont.ar/cinear/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Tec TV', url: 'https://tv.initium.net.ar:3939/live/tectvmainlive.m3u8', group: 'Argentina', logo: '' },
+            { name: 'DeporTV', url: 'https://5fb24b460df87.streamlock.net/live-cont.ar/deportv/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Canal E', url: 'https://unlimited1-us.dps.live/perfiltv/perfiltv.smil/perfiltv/livestream2/chunks.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Telemax', url: 'https://live-edge01.telecentro.net.ar/live/smil:tlx.smil/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Net TV', url: 'https://unlimited1-us.dps.live/nettv/nettv.smil/playlist.m3u8', group: 'Argentina', logo: '' },
+            { name: 'TV Universidad', url: 'https://stratus.stream.cespi.unlp.edu.ar/hls/tvunlp.m3u8', group: 'Argentina', logo: '' },
+            { name: 'Urbana Tevé', url: 'https://cdnhd.iblups.com/hls/DD3nXkAkWk.m3u8', group: 'Argentina', logo: '' },
+            { name: 'El Trece', url: 'https://live-01-02-eltrece.vodgc.net/eltrecetv/index.m3u8', group: 'Argentina', logo: '' },
+            { name: 'El Nueve', url: 'https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8', group: 'Argentina', logo: '' },
+        ];
+
+        class TeleArgentina {
+            constructor() {
+                this.channels = [];
+                this.currentChannel = 0;
+                this.volume = 0.5;
+                this.isMuted = false;
+                this.isPoweredOn = false;
+                this.hls = null;
+                this.channelInfoTimeout = null;
+                this.loadTimeout = null;
+
+                // Background scanning
+                this.isScanning = false;
+                this.scanIndex = 0;
+                this.scanWorkers = [];
+                this.numScanWorkers = 3;
+
+                // Channel status tracking
+                this.failedChannels = new Set();
+                this.workingChannels = new Set();
+                this.loadChannelStatus();
+
+                // DOM Elements
+                this.video = document.getElementById('video-player');
+                this.noSignal = document.getElementById('no-signal');
+                this.loading = document.getElementById('loading');
+                this.channelInfo = document.getElementById('channel-info');
+                this.channelLogo = document.getElementById('channel-logo');
+                this.channelNameEl = document.getElementById('channel-name');
+                this.channelList = document.getElementById('channel-list');
+                this.activeCountEl = document.getElementById('active-count');
+                this.inactiveCountEl = document.getElementById('inactive-count');
+                this.scanBtn = document.getElementById('scan-btn');
+                this.scanBtnText = document.getElementById('scan-btn-text');
+                this.scanIndicator = document.getElementById('scan-indicator');
+                this.powerBtn = document.getElementById('power-btn');
+                this.channelKnob = document.getElementById('channel-knob');
+                this.volumeKnob = document.getElementById('volume-knob');
+                this.screen = document.getElementById('screen');
+                this.muteIcon = document.getElementById('mute-icon');
+                this.youtubePlayer = document.getElementById('youtube-player');
+                this.isYouTubeChannel = false;
+
+                this.init();
+            }
+
+            loadChannelStatus() {
+                try {
+                    const failed = localStorage.getItem('argentina_tv_failed');
+                    const working = localStorage.getItem('argentina_tv_working');
+                    if (failed) this.failedChannels = new Set(JSON.parse(failed));
+                    if (working) this.workingChannels = new Set(JSON.parse(working));
+                } catch (e) { }
+            }
+
+            saveChannelStatus() {
+                try {
+                    localStorage.setItem('argentina_tv_failed', JSON.stringify([...this.failedChannels]));
+                    localStorage.setItem('argentina_tv_working', JSON.stringify([...this.workingChannels]));
+                } catch (e) { }
+            }
+
+            updateStatusDisplay() {
+                const working = this.channels.filter(ch => this.workingChannels.has(ch.name + ch.url)).length;
+                const failed = this.channels.filter(ch => this.failedChannels.has(ch.name + ch.url)).length;
+                this.activeCountEl.textContent = working;
+                this.inactiveCountEl.textContent = failed;
+            }
+
+            async init() {
+                await this.loadPlaylist();
+                this.buildChannelList();
+                this.setupEventListeners();
+                this.updateVolumeKnob();
+                this.updateStatusDisplay();
+
+                // Auto power on if we have channels
+                if (this.channels.length > 0) {
+                    this.powerOn();
+                }
+            }
+
+            async loadPlaylist() {
+                try {
+                    const response = await fetch('https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8');
+                    const text = await response.text();
+                    this.parsePlaylist(text);
+
+                    // Add extra hardcoded channels and deduplicate
+                    this.mergeExtraChannels();
+
+                    console.log(`🇦🇷 Loaded ${this.channels.length} Argentine channels`);
+                } catch (error) {
+                    console.error('Failed to load playlist:', error);
+                    // Still add extra channels if remote fails
+                    this.mergeExtraChannels();
+                }
+            }
+
+            mergeExtraChannels() {
+                // Create a Set of existing channel identifiers for deduplication
+                const existingUrls = new Set(this.channels.map(ch => ch.url.toLowerCase()));
+                const existingNames = new Set(this.channels.map(ch => ch.name.toLowerCase()));
+
+                for (const extra of EXTRA_ARGENTINA_CHANNELS) {
+                    // Skip if URL or name already exists
+                    if (existingUrls.has(extra.url.toLowerCase())) continue;
+                    if (existingNames.has(extra.name.toLowerCase())) continue;
+
+                    this.channels.push({ ...extra });
+                    existingUrls.add(extra.url.toLowerCase());
+                    existingNames.add(extra.name.toLowerCase());
+                }
+            }
+
+            parsePlaylist(text) {
+                const lines = text.split('\n');
+                let currentChannel = null;
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+
+                    if (line.startsWith('#EXTINF:')) {
+                        currentChannel = this.parseExtInf(line);
+                    } else if (line && !line.startsWith('#') && currentChannel) {
+                        currentChannel.url = line;
+                        // ONLY include Argentina channels (now includes YouTube)
+                        if (currentChannel.group &&
+                            currentChannel.group.toLowerCase().includes('argentina')) {
+                            this.channels.push(currentChannel);
+                        }
+                        currentChannel = null;
+                    }
+                }
+            }
+
+            parseExtInf(line) {
+                const channel = { name: '', logo: '', group: '', id: '' };
+                const nameMatch = line.match(/tvg-name="([^"]*)"/);
+                if (nameMatch) channel.name = nameMatch[1];
+                const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+                if (logoMatch) channel.logo = logoMatch[1];
+                const groupMatch = line.match(/group-title="([^"]*)"/);
+                if (groupMatch) channel.group = groupMatch[1];
+                const idMatch = line.match(/tvg-id="([^"]*)"/);
+                if (idMatch) channel.id = idMatch[1];
+                const commaIndex = line.lastIndexOf(',');
+                if (commaIndex !== -1 && !channel.name) {
+                    channel.name = line.substring(commaIndex + 1).trim();
+                }
+                return channel;
+            }
+
+            buildChannelList() {
+                this.channelList.innerHTML = '';
+
+                if (this.channels.length === 0) {
+                    this.channelList.innerHTML = `
+                        <li class="text-center py-8">
+                            <span class="material-symbols-outlined text-4xl text-red-400">error</span>
+                            <p class="font-hand text-gray-500 text-xl mt-2">No se encontraron canales</p>
+                        </li>
+                    `;
+                    return;
+                }
+
+                // Create sorted indices: working first, then untested, then failed
+                const sortedIndices = this.channels.map((ch, idx) => idx).sort((a, b) => {
+                    const keyA = this.channels[a].name + this.channels[a].url;
+                    const keyB = this.channels[b].name + this.channels[b].url;
+                    const workingA = this.workingChannels.has(keyA);
+                    const workingB = this.workingChannels.has(keyB);
+                    const failedA = this.failedChannels.has(keyA);
+                    const failedB = this.failedChannels.has(keyB);
+
+                    // Sort order: working (0) > untested (1) > failed (2)
+                    const scoreA = workingA ? 0 : (failedA ? 2 : 1);
+                    const scoreB = workingB ? 0 : (failedB ? 2 : 1);
+                    return scoreA - scoreB;
+                });
+
+                sortedIndices.forEach((index, displayOrder) => {
+                    const channel = this.channels[index];
+                    const key = channel.name + channel.url;
+                    const isWorking = this.workingChannels.has(key);
+                    const isFailed = this.failedChannels.has(key);
+                    const isYouTube = this.isYouTubeUrl(channel.url);
+
+                    const li = document.createElement('li');
+                    li.className = 'channel-item group flex items-center gap-3 cursor-pointer p-1 hover:bg-yellow-100/50 rounded transition-colors';
+                    li.dataset.index = index;
+
+                    let statusText, statusClass;
+                    if (isWorking) {
+                        statusText = 'En Vivo';
+                        statusClass = 'text-green-600';
+                    } else if (isFailed) {
+                        statusText = 'Sin Señal - Click para reintentar';
+                        statusClass = 'text-red-500';
+                    } else {
+                        statusText = 'Sin Probar';
+                        statusClass = 'text-yellow-600 bg-yellow-200 px-1';
+                    }
+
+                    // YouTube badge
+                    const ytBadge = isYouTube ? '<span class="bg-red-600 text-white text-[10px] px-1 rounded font-bold ml-1">YT</span>' : '';
+
+                    li.innerHTML = `
+                        <div class="font-hand text-2xl text-gray-400 w-8 text-right group-hover:text-red-600">${String(displayOrder + 1).padStart(2, '0')}</div>
+                        <div class="flex-1 border-b border-gray-300 pb-1 border-dashed">
+                            <h3 class="font-serif font-bold text-gray-800 text-lg leading-none">${channel.name}${ytBadge}</h3>
+                            <span class="text-xs font-ui uppercase tracking-wider ${statusClass}">${statusText}</span>
+                        </div>
+                        ${isWorking ? '<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>' : ''}
+                    `;
+
+                    // All channels are clickable - including failed ones for retry
+                    li.addEventListener('click', () => {
+                        // If it was failed, clear the failed status to retry
+                        if (isFailed) {
+                            this.failedChannels.delete(key);
+                            this.saveChannelStatus();
+                        }
+                        this.selectChannel(index);
+                    });
+
+                    this.channelList.appendChild(li);
+                });
+            }
+
+            updateChannelListItem(index) {
+                // Rebuild the entire list to maintain sorted order
+                this.buildChannelList();
+                this.updateActiveChannel();
+            }
+
+            selectChannel(index) {
+                if (!this.isPoweredOn) {
+                    this.powerOn();
+                }
+                this.currentChannel = index;
+                this.playChannel(index);
+                this.updateActiveChannel();
+            }
+
+            updateActiveChannel() {
+                document.querySelectorAll('.channel-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                const activeItem = this.channelList.querySelector(`[data-index="${this.currentChannel}"]`);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                    activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            setupEventListeners() {
+                // Power button
+                this.powerBtn.addEventListener('click', () => this.togglePower());
+
+                // Scan button
+                this.scanBtn.addEventListener('click', () => this.toggleScan());
+
+                // Rescan all button (clears status and rescans everything)
+                document.getElementById('rescan-btn').addEventListener('click', () => this.rescanAll());
+
+                // Fullscreen button
+                document.getElementById('fullscreen-btn').addEventListener('click', () => this.toggleFullscreen());
+
+                // Mute button
+                document.getElementById('mute-btn').addEventListener('click', () => this.toggleMute());
+
+                // Screen click for fullscreen
+                this.screen.addEventListener('click', () => this.toggleFullscreen());
+
+                // Video click for fullscreen (in case video captures the click)
+                this.video.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleFullscreen();
+                });
+
+                // Channel knob
+                this.channelKnob.addEventListener('click', (e) => {
+                    const rect = this.channelKnob.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    if (x > 0) this.nextChannel();
+                    else this.prevChannel();
+                });
+
+                // Volume knob
+                this.volumeKnob.addEventListener('click', (e) => {
+                    const rect = this.volumeKnob.getBoundingClientRect();
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    if (y < 0) this.volumeUp();
+                    else this.volumeDown();
+                });
+
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') return;
+                    if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey) {
+                        this.toggleFullscreen();
+                        return;
+                    }
+                    if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
+                        this.toggleMute();
+                        return;
+                    }
+                    switch (e.key) {
+                        case 'ArrowRight': this.nextChannel(); break;
+                        case 'ArrowLeft': this.prevChannel(); break;
+                        case 'ArrowUp': this.volumeUp(); break;
+                        case 'ArrowDown': this.volumeDown(); break;
+                        case ' ':
+                            e.preventDefault();
+                            this.togglePower();
+                            break;
+                    }
+                });
+
+                // Mouse wheel on knobs
+                this.channelKnob.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (e.deltaY < 0) this.nextChannel();
+                    else this.prevChannel();
+                });
+
+                this.volumeKnob.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (e.deltaY < 0) this.volumeUp();
+                    else this.volumeDown();
+                });
+
+                // Video events
+                this.video.addEventListener('playing', () => {
+                    this.loading.classList.add('hidden');
+                    this.noSignal.classList.add('hidden');
+                    clearTimeout(this.loadTimeout);
+
+                    const ch = this.channels[this.currentChannel];
+                    if (ch) {
+                        const key = ch.name + ch.url;
+                        this.workingChannels.add(key);
+                        this.failedChannels.delete(key);
+                        this.saveChannelStatus();
+                        this.updateStatusDisplay();
+                        this.updateChannelListItem(this.currentChannel);
+                    }
+                });
+
+                this.video.addEventListener('waiting', () => {
+                    this.loading.classList.remove('hidden');
+                });
+
+                this.video.addEventListener('error', () => {
+                    this.handleChannelError();
+                });
+            }
+
+            toggleFullscreen() {
+                if (!this.isPoweredOn) return;
+
+                console.log('Toggling fullscreen. YouTube Channel:', this.isYouTubeChannel);
+
+                // Check if already in fullscreen
+                const fullscreenElement = document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement;
+
+                if (fullscreenElement) {
+                    console.log('Exiting fullscreen...');
+                    // Exit fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                } else {
+                    // Enter fullscreen - target video element directly
+                    const element = this.isYouTubeChannel ? this.youtubePlayer : this.video;
+                    console.log('Requesting fullscreen for element:', element.tagName, element.id);
+
+                    if (element.requestFullscreen) {
+                        element.requestFullscreen().catch(err => {
+                            console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+                        });
+                    } else if (element.webkitRequestFullscreen) {
+                        element.webkitRequestFullscreen();
+                    } else if (element.webkitEnterFullscreen) {
+                        // iOS Safari
+                        console.log('Using webkitEnterFullscreen (iOS)');
+                        element.webkitEnterFullscreen();
+                    } else if (element.mozRequestFullScreen) {
+                        element.mozRequestFullScreen();
+                    } else if (element.msRequestFullscreen) {
+                        element.msRequestFullscreen();
+                    } else {
+                        console.warn('No valid fullscreen method found for this element');
+                    }
+                }
+            }
+
+            // YouTube URL helpers
+            isYouTubeUrl(url) {
+                return url.includes('youtube.com') || url.includes('youtu.be');
+            }
+
+            getYouTubeVideoId(url) {
+                // youtube.com/watch?v=VIDEO_ID
+                const watchMatch = url.match(/[?&]v=([^&]+)/);
+                if (watchMatch) return watchMatch[1];
+
+                // youtu.be/VIDEO_ID
+                const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+                if (shortMatch) return shortMatch[1];
+
+                // youtube.com/embed/VIDEO_ID
+                const embedMatch = url.match(/youtube\.com\/embed\/([^?&]+)/);
+                if (embedMatch) return embedMatch[1];
+
+                // youtube.com/live/VIDEO_ID
+                const liveMatch = url.match(/youtube\.com\/live\/([^?&]+)/);
+                if (liveMatch) return liveMatch[1];
+
+                return null;
+            }
+
+            // Get YouTube channel name for live streams
+            getYouTubeChannelName(url) {
+                // youtube.com/c/CHANNEL_NAME/live
+                const cMatch = url.match(/youtube\.com\/c\/([^\/]+)\/live/i);
+                if (cMatch) return cMatch[1];
+
+                // youtube.com/user/USERNAME/live
+                const userMatch = url.match(/youtube\.com\/user\/([^\/]+)\/live/i);
+                if (userMatch) return userMatch[1];
+
+                // youtube.com/@HANDLE/live
+                const handleMatch = url.match(/youtube\.com\/@([^\/]+)\/live/i);
+                if (handleMatch) return handleMatch[1];
+
+                return null;
+            }
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                this.video.muted = this.isMuted;
+                this.muteIcon.textContent = this.isMuted ? 'volume_off' : 'volume_up';
+            }
+
+            toggleScan() {
+                if (!this.isPoweredOn) this.powerOn();
+                if (this.isScanning) this.stopScan();
+                else this.startScan();
+            }
+
+            startScan() {
+                this.isScanning = true;
+                this.scanBtn.classList.add('bg-gray-600');
+                this.scanBtnText.textContent = 'Detener Escaneo';
+                this.scanIndicator.classList.add('animate-pulse');
+                this.scanIndex = 0;
+
+                // Mark untested channels as scanning
+                document.querySelectorAll('.channel-item').forEach(item => {
+                    const index = parseInt(item.dataset.index);
+                    const ch = this.channels[index];
+                    const key = ch.name + ch.url;
+                    if (!this.workingChannels.has(key) && !this.failedChannels.has(key)) {
+                        item.classList.add('scanning');
+                    }
+                });
+
+                this.initScanWorkers();
+                this.launchScanWorkers();
+            }
+
+            stopScan() {
+                this.isScanning = false;
+                this.scanBtn.classList.remove('bg-gray-600');
+                this.scanBtnText.textContent = 'Escanear Canales';
+                this.scanIndicator.classList.remove('animate-pulse');
+
+                document.querySelectorAll('.channel-item.scanning').forEach(item => {
+                    item.classList.remove('scanning');
+                });
+
+                this.scanWorkers.forEach(w => {
+                    clearTimeout(w.timeout);
+                    if (w.hls) w.hls.destroy();
+                    if (w.onPlaying) w.video.removeEventListener('playing', w.onPlaying);
+                    w.video.src = '';
+                    w.video.load();
+                    if (w.video.parentNode) w.video.parentNode.removeChild(w.video);
+                });
+                this.scanWorkers = [];
+            }
+
+            rescanAll() {
+                // Stop any current scan
+                if (this.isScanning) this.stopScan();
+
+                // Clear all channel status
+                this.failedChannels.clear();
+                this.workingChannels.clear();
+                this.saveChannelStatus();
+                this.updateStatusDisplay();
+
+                // Rebuild channel list to show "Sin Probar" status
+                this.buildChannelList();
+
+                // Start fresh scan
+                if (!this.isPoweredOn) this.powerOn();
+                this.startScan();
+            }
+
+            initScanWorkers() {
+                this.scanWorkers = [];
+                for (let i = 0; i < this.numScanWorkers; i++) {
+                    const video = document.createElement('video');
+                    video.style.display = 'none';
+                    video.muted = true;
+                    document.body.appendChild(video);
+                    this.scanWorkers.push({ video, hls: null, timeout: null, index: -1 });
+                }
+            }
+
+            launchScanWorkers() {
+                this.scanWorkers.forEach(worker => this.scanWithWorker(worker));
+            }
+
+            getNextScanIndex() {
+                while (this.scanIndex < this.channels.length) {
+                    const ch = this.channels[this.scanIndex];
+                    const key = ch.name + ch.url;
+                    if (!this.workingChannels.has(key) && !this.failedChannels.has(key)) {
+                        return this.scanIndex++;
+                    }
+                    this.scanIndex++;
+                }
+                return -1;
+            }
+
+            scanWithWorker(worker) {
+                if (!this.isScanning) return;
+
+                const index = this.getNextScanIndex();
+                if (index === -1) {
+                    const allDone = this.scanWorkers.every(w => w.index === -1);
+                    if (allDone) {
+                        this.stopScan();
+                        // Only auto-select if powered on
+                        if (this.isPoweredOn && (!this.video.src || this.video.paused)) {
+                            const firstWorking = this.channels.findIndex(ch =>
+                                this.workingChannels.has(ch.name + ch.url)
+                            );
+                            if (firstWorking >= 0) this.selectChannel(firstWorking);
+                        }
+                    }
+                    return;
+                }
+
+                worker.index = index;
+                const channel = this.channels[index];
+                const url = channel.url;
+
+                // YouTube URLs can't be tested - assume they work
+                if (this.isYouTubeUrl(url)) {
+                    const key = channel.name + url;
+                    this.workingChannels.add(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                    this.updateChannelListItem(index);
+                    worker.index = -1;
+                    this.scanWithWorker(worker);
+                    return;
+                }
+
+                clearTimeout(worker.timeout);
+                if (worker.hls) { worker.hls.destroy(); worker.hls = null; }
+                if (worker.onPlaying) worker.video.removeEventListener('playing', worker.onPlaying);
+                worker.video.src = '';
+
+                worker.timeout = setTimeout(() => this.onWorkerFail(worker), 4000);
+
+                worker.onPlaying = () => {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                    worker.onPlaying = null;
+                    this.onWorkerSuccess(worker);
+                };
+                worker.video.addEventListener('playing', worker.onPlaying);
+
+                if (url.includes('.m3u8') && Hls.isSupported()) {
+                    worker.hls = new Hls({ enableWorker: false });
+                    worker.hls.loadSource(url);
+                    worker.hls.attachMedia(worker.video);
+                    worker.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        worker.video.play().catch(() => this.onWorkerFail(worker));
+                    });
+                    worker.hls.on(Hls.Events.ERROR, (e, data) => {
+                        if (data.fatal) this.onWorkerFail(worker);
+                    });
+                } else {
+                    worker.video.src = url;
+                    worker.video.play().catch(() => this.onWorkerFail(worker));
+                }
+            }
+
+            onWorkerSuccess(worker) {
+                if (!this.isScanning || worker.index === -1) return;
+                clearTimeout(worker.timeout);
+
+                const foundIndex = worker.index;
+                const ch = this.channels[foundIndex];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.workingChannels.add(key);
+                    this.failedChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                    this.updateChannelListItem(foundIndex);
+
+                    // Only auto-select if powered on and no video playing
+                    if (this.isPoweredOn && (!this.video.src || this.video.error)) {
+                        this.selectChannel(foundIndex);
+                    }
+                }
+
+                worker.index = -1;
+                this.scanWithWorker(worker);
+            }
+
+            onWorkerFail(worker) {
+                if (!this.isScanning || worker.index === -1) return;
+                clearTimeout(worker.timeout);
+
+                if (worker.onPlaying) {
+                    worker.video.removeEventListener('playing', worker.onPlaying);
+                    worker.onPlaying = null;
+                }
+
+                const ch = this.channels[worker.index];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.failedChannels.add(key);
+                    this.workingChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                    this.updateChannelListItem(worker.index);
+                }
+
+                worker.index = -1;
+                this.scanWithWorker(worker);
+            }
+
+            handleChannelError() {
+                const ch = this.channels[this.currentChannel];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.failedChannels.add(key);
+                    this.workingChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                    this.updateChannelListItem(this.currentChannel);
+                }
+                this.nextWorkingChannel();
+            }
+
+            nextWorkingChannel() {
+                let nextIndex = (this.currentChannel + 1) % this.channels.length;
+                let attempts = 0;
+
+                while (attempts < this.channels.length) {
+                    const ch = this.channels[nextIndex];
+                    const key = ch.name + ch.url;
+                    if (this.workingChannels.has(key) || !this.failedChannels.has(key)) {
+                        this.currentChannel = nextIndex;
+                        this.playChannel(nextIndex);
+                        this.updateActiveChannel();
+                        return;
+                    }
+                    nextIndex = (nextIndex + 1) % this.channels.length;
+                    attempts++;
+                }
+
+                this.showNoSignal();
+            }
+
+            togglePower() {
+                this.isPoweredOn = !this.isPoweredOn;
+                if (this.isPoweredOn) this.powerOn();
+                else this.powerOff();
+            }
+
+            powerOn() {
+                this.isPoweredOn = true;
+                this.powerBtn.querySelector('span').classList.remove('text-red-500');
+                this.powerBtn.querySelector('span').classList.add('text-green-500');
+                this.noSignal.classList.remove('hidden');
+                this.loading.classList.add('hidden');
+
+                setTimeout(() => {
+                    if (this.channels.length > 0) {
+                        const firstWorking = this.channels.findIndex(ch =>
+                            this.workingChannels.has(ch.name + ch.url)
+                        );
+                        if (firstWorking >= 0) {
+                            this.currentChannel = firstWorking;
+                            this.playChannel(firstWorking);
+                            this.updateActiveChannel();
+                        } else {
+                            this.startScan();
+                        }
+                    }
+                }, 500);
+            }
+
+            powerOff() {
+                this.isPoweredOn = false;
+                this.powerBtn.querySelector('span').classList.add('text-red-500');
+                this.powerBtn.querySelector('span').classList.remove('text-green-500');
+                this.noSignal.classList.remove('hidden');
+                this.loading.classList.add('hidden');
+                this.channelInfo.style.opacity = '0';
+
+                if (this.isScanning) this.stopScan();
+                if (this.hls) { this.hls.destroy(); this.hls = null; }
+                this.video.src = '';
+                this.video.load();
+                this.video.classList.remove('hidden');
+
+                // Clear YouTube player
+                this.youtubePlayer.src = '';
+                this.youtubePlayer.classList.add('hidden');
+                this.isYouTubeChannel = false;
+
+                document.querySelectorAll('.channel-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+            }
+
+            nextChannel() {
+                if (!this.isPoweredOn || this.channels.length === 0) return;
+
+                let nextIndex = (this.currentChannel + 1) % this.channels.length;
+                this.currentChannel = nextIndex;
+                this.playChannel(this.currentChannel);
+                this.updateActiveChannel();
+                this.animateChannelKnob(1);
+            }
+
+            prevChannel() {
+                if (!this.isPoweredOn || this.channels.length === 0) return;
+
+                let prevIndex = (this.currentChannel - 1 + this.channels.length) % this.channels.length;
+                this.currentChannel = prevIndex;
+                this.playChannel(this.currentChannel);
+                this.updateActiveChannel();
+                this.animateChannelKnob(-1);
+            }
+
+            playChannel(index) {
+                const channel = this.channels[index];
+                if (!channel) return;
+
+                clearTimeout(this.loadTimeout);
+
+                this.loading.classList.remove('hidden');
+                this.noSignal.classList.add('hidden');
+
+                this.showChannelInfo(channel);
+
+                if (this.hls) { this.hls.destroy(); this.hls = null; }
+
+                const url = channel.url;
+
+                // Check if it's a YouTube URL
+                if (this.isYouTubeUrl(url)) {
+                    this.playYouTube(url);
+                    return;
+                }
+
+                // Hide YouTube player, show video
+                this.youtubePlayer.classList.add('hidden');
+                this.youtubePlayer.src = '';
+                this.video.classList.remove('hidden');
+                this.isYouTubeChannel = false;
+
+                this.loadTimeout = setTimeout(() => {
+                    this.handleChannelError();
+                }, 8000);
+
+                if (url.includes('.m3u8')) {
+                    if (Hls.isSupported()) {
+                        this.hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                        this.hls.loadSource(url);
+                        this.hls.attachMedia(this.video);
+                        this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            this.video.play().catch(() => { });
+                        });
+                        this.hls.on(Hls.Events.ERROR, (event, data) => {
+                            if (data.fatal) this.handleChannelError();
+                        });
+                    } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+                        this.video.src = url;
+                        this.video.play().catch(() => { });
+                    }
+                } else {
+                    this.video.src = url;
+                    this.video.play().catch(() => { });
+                }
+
+                this.video.volume = this.volume;
+                this.video.muted = this.isMuted;
+            }
+
+            playYouTube(url) {
+                const videoId = this.getYouTubeVideoId(url);
+                const channelName = this.getYouTubeChannelName(url);
+
+                let embedUrl;
+                if (videoId) {
+                    // Direct video ID - use standard embed
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${this.isMuted ? 1 : 0}&enablejsapi=1&rel=0`;
+                } else if (channelName) {
+                    // Channel live stream - use popout player (opens in iframe but may have restrictions)
+                    // Try embedding the channel's live page
+                    embedUrl = `https://www.youtube.com/embed/live_stream?channel=${channelName}&autoplay=1&mute=${this.isMuted ? 1 : 0}`;
+                    console.log('Using channel live embed for:', channelName);
+                } else {
+                    console.log('Could not extract YouTube video ID or channel from:', url);
+                    // Mark as failed and skip
+                    const ch = this.channels[this.currentChannel];
+                    if (ch) {
+                        const key = ch.name + ch.url;
+                        this.failedChannels.add(key);
+                        this.workingChannels.delete(key);
+                        this.saveChannelStatus();
+                        this.updateStatusDisplay();
+                        this.updateChannelListItem(this.currentChannel);
+                    }
+                    this.nextWorkingChannel();
+                    return;
+                }
+
+                // Hide video element, show YouTube iframe
+                this.video.pause();
+                this.video.src = '';
+                this.video.classList.add('hidden');
+                this.youtubePlayer.classList.remove('hidden');
+                this.isYouTubeChannel = true;
+
+                this.youtubePlayer.src = embedUrl;
+
+                // Mark as working (YouTube doesn't give us load events easily)
+                this.loading.classList.add('hidden');
+                this.noSignal.classList.add('hidden');
+
+                const ch = this.channels[this.currentChannel];
+                if (ch) {
+                    const key = ch.name + ch.url;
+                    this.workingChannels.add(key);
+                    this.failedChannels.delete(key);
+                    this.saveChannelStatus();
+                    this.updateStatusDisplay();
+                    this.updateChannelListItem(this.currentChannel);
+                }
+            }
+
+            showChannelInfo(channel) {
+                this.channelNameEl.textContent = channel.name;
+
+                if (channel.logo) {
+                    this.channelLogo.src = channel.logo;
+                    this.channelLogo.classList.remove('hidden');
+                } else {
+                    this.channelLogo.classList.add('hidden');
+                }
+
+                this.channelInfo.style.opacity = '1';
+
+                clearTimeout(this.channelInfoTimeout);
+                this.channelInfoTimeout = setTimeout(() => {
+                    this.channelInfo.style.opacity = '0';
+                }, 5000);
+            }
+
+            showNoSignal() {
+                this.loading.classList.add('hidden');
+                this.noSignal.classList.remove('hidden');
+            }
+
+            volumeUp() {
+                this.volume = Math.min(1, this.volume + 0.1);
+                this.video.volume = this.volume;
+                this.updateVolumeKnob();
+            }
+
+            volumeDown() {
+                this.volume = Math.max(0, this.volume - 0.1);
+                this.video.volume = this.volume;
+                this.updateVolumeKnob();
+            }
+
+            animateChannelKnob(direction) {
+                const rotation = (this.currentChannel * 15) % 360;
+                const indicator = this.channelKnob.querySelector('div');
+                if (indicator) indicator.style.setProperty('--rotation', `${rotation}deg`);
+            }
+
+            updateVolumeKnob() {
+                const rotation = (this.volume * 270) - 135;
+                const indicator = this.volumeKnob.querySelector('div');
+                if (indicator) indicator.style.setProperty('--rotation', `${rotation}deg`);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.tv = new TeleArgentina();
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('🇦🇷 ServiceWorker registered:', registration.scope))
+                    .catch(error => console.log('ServiceWorker registration failed:', error));
+            });
+        }
+    </script>
+</body>
+
+</html>
